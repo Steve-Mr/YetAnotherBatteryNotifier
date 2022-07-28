@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Yet Another Battery Notifier</string>
+    <string name="yet_another_battery_notifier">Yet Another Battery Notifier</string>
+    <string name="yet_another_battery_notifier_is_running">Yet Anohter Battery Notifier is running.</string>
+    <string name="charged">"Your phone has charged to "</string>
+    <string name="default_channel">Foreground Service</string>
+    <string name="default_channel_description">This channel is for the on going notification when foreground service is running whick is nessery for the app\'s function.</string>
+    <string name="channel_notify">Charged Notification</string>
+    <string name="channel_notify_description">Channel for charged notification.</string>
+</resources>
