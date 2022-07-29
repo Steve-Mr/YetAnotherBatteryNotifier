@@ -77,10 +77,10 @@ class ForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        val filter = IntentFilter()
-        filter.addAction(Intent.ACTION_POWER_CONNECTED)
-        filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
-        registerReceiver(chargingReceiver, filter)
+//        val filter = IntentFilter()
+//        filter.addAction(Intent.ACTION_POWER_CONNECTED)
+//        filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+//        registerReceiver(chargingReceiver, filter)
     }
 
     override fun onDestroy() {
