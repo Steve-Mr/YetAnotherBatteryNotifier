@@ -20,6 +20,9 @@ class BatteryChargingReceiver : BroadcastReceiver() {
         val packageManager = p0.packageManager
         val componentName = ComponentName(p0, ScreenOnOffReceiver::class.java)
         val intent = Intent(p0, DynamicNotificationService::class.java)
+        val filter = IntentFilter()
+
+        val screenReceiver = ScreenOnOffReceiver()
 
         if ("android.intent.action.ACTION_POWER_CONNECTED" == p1.action) {
 
@@ -27,16 +30,21 @@ class BatteryChargingReceiver : BroadcastReceiver() {
                 p0.startService(intent)
             }
 
-            packageManager.setComponentEnabledSetting(componentName,
-                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-            PackageManager.DONT_KILL_APP)
+//            packageManager.setComponentEnabledSetting(componentName,
+//                PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+//            PackageManager.DONT_KILL_APP)
+            filter.addAction(Intent.ACTION_SCREEN_ON)
+            filter.addAction(Intent.ACTION_SCREEN_OFF)
+            p0.registerReceiver(screenReceiver, filter)
             Log.v("==CHARGING ALT==", "Screen on")
         }
         if ("android.intent.action.ACTION_POWER_DISCONNECTED" == p1.action) {
             Log.v("==DISCHARGED ALT==", "from receiver")
-            packageManager.setComponentEnabledSetting(componentName,
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP)
+            p0.unregisterReceiver(screenReceiver)
+//            packageManager.setComponentEnabledSetting(componentName,
+//                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+//                PackageManager.DONT_KILL_APP)
+
             p0.stopService(intent)
         }
     }

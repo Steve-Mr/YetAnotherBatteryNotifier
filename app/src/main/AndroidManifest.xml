@@ -67,14 +67,10 @@
 
         <receiver android:name=".BatteryChargingReceiver"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
-            </intent-filter>
         </receiver>
 
         <receiver android:name=".ScreenOnOffReceiver"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.SCREEN_ON"/>
