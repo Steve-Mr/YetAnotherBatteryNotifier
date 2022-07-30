@@ -67,9 +67,6 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver"/>
-                <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver.NotCharging"/>
-                <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency"/>
-                <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver.AutoBoot"/>
             </intent-filter>
         </receiver>
     </application>

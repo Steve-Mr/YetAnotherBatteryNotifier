@@ -1,15 +1,10 @@
 package com.maary.yetanotherbatterynotifier
 
 import android.app.Notification
-import android.app.Notification.EXTRA_NOTIFICATION_ID
-import android.app.Notification.FLAG_LOCAL_ONLY
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.content.*
 import android.os.BatteryManager
 import android.os.IBinder
 import android.os.PowerManager
@@ -28,6 +23,8 @@ class ForegroundService : Service() {
     val screenReceiver = ScreenReceiver()
     private val chargingReceiver = ChargingReceiver()
     val levelReceiver = BatteryLevelReceiver()
+
+    lateinit var sharedPref : SharedPreferences
 
     companion object {
         private var isForegroundServiceRunning = false
@@ -81,6 +78,7 @@ class ForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        sharedPref = getSharedPreferences(getString(R.string.name_shared_pref), Context.MODE_PRIVATE)
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_POWER_CONNECTED)
         filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
@@ -127,7 +125,7 @@ class ForegroundService : Service() {
                     )
                     Log.v("RUNNING", "timer task")
                 }
-            }, 0, 5000L)
+            }, 0, sharedPref.getLong(getString(R.string.shared_pref_frequency), 5000L))
         }
     }
 

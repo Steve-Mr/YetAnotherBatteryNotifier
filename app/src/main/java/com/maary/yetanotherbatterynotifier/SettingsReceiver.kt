@@ -1,6 +1,5 @@
 package com.maary.yetanotherbatterynotifier
 
-import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
@@ -8,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import java.util.Collections.frequency
 
 class SettingsReceiver: BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
@@ -59,13 +57,101 @@ class SettingsReceiver: BroadcastReceiver() {
         }
 
         if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency" == p1?.action) {
-            // todo: 写入，foreground 查询
+            val actionOneSec = p0?.let {
+                generateAction(
+                    it,
+                    SettingsReceiver::class.java,
+                    "com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.OneSec",
+                    R.string.one_sec
+                )
+            }
+            val actionTwoSec = p0?.let {
+                generateAction(
+                    it,
+                    SettingsReceiver::class.java,
+                    "com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.TwoSec",
+                    R.string.two_sec
+                )
+            }
+            val actionFiveSec = p0?.let {
+                generateAction(
+                    it,
+                    SettingsReceiver::class.java,
+                    "com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.FiveSec",
+                    R.string.five_sec
+                )
+            }
+            val actionOneMin = p0?.let {
+                generateAction(
+                    it,
+                    SettingsReceiver::class.java,
+                    "com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.OneMin",
+                    R.string.one_min
+                )
+            }
+            val actions: MutableList<NotificationCompat.Action> = ArrayList()
+            actionOneSec?.let { actions.add(it) }
+            actionTwoSec?.let { actions.add(it) }
+            actionFiveSec?.let { actions.add(it) }
+            actionOneMin?.let { actions.add(it) }
+            p0?.let { notify(it,actions) }
+
         }
 
         if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.AutoBoot" == p1?.action) {
             Log.v("SETTINGS", "auto boot")
             // todo; 写入 qstileservice 查询
         }
+
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.OneSec" == p1?.action){
+            Log.v("ONE SEC", "ONE SEC")
+            val sharedPref =
+                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE) ?: return
+            with(sharedPref.edit()){
+                putLong(p0.getString(R.string.shared_pref_frequency), 1000L)
+                apply()
+            }
+            val notificationManager: NotificationManager =
+                p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(3)
+        }
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.TwoSec" == p1?.action){
+//            Log.v("ONE SEC", " SEC")
+            val sharedPref =
+                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE) ?: return
+            with(sharedPref.edit()){
+                putLong(p0.getString(R.string.shared_pref_frequency), 2000L)
+                apply()
+            }
+            val notificationManager: NotificationManager =
+                p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(3)
+        }
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.FiveSec" == p1?.action){
+//            Log.v("ONE SEC", "ONE SEC")
+            val sharedPref =
+                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE) ?: return
+            with(sharedPref.edit()){
+                putLong(p0.getString(R.string.shared_pref_frequency), 5000L)
+                apply()
+            }
+            val notificationManager: NotificationManager =
+                p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(3)
+        }
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.OneMin" == p1?.action){
+//            Log.v("ONE SEC", "ONE SEC")
+            val sharedPref =
+                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE) ?: return
+            with(sharedPref.edit()){
+                putLong(p0.getString(R.string.shared_pref_frequency), 60000L)
+                apply()
+            }
+            val notificationManager: NotificationManager =
+                p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(3)
+        }
+
 
         }
 
@@ -90,7 +176,7 @@ class SettingsReceiver: BroadcastReceiver() {
         ).build()
     }
 
-    fun notify(
+    private fun notify(
         context: Context,
         actions: List<NotificationCompat.Action>){
 
