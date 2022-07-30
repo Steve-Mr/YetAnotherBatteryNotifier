@@ -84,19 +84,25 @@ class ForegroundService : Service() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
+        Log.v("SERVICE", "onDestroy()")
         isForegroundServiceRunning = false
         unregisterReceiver(chargingReceiver)
+        stopTimerTask()
         if (isLevelReceiver) unregisterReceiver(levelReceiver)
         if (isScreenOnReceiver) unregisterReceiver(screenReceiver)
+        val notificationManager: NotificationManager =
+            this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(1)
+        notificationManager.cancel(2)
+        super.onDestroy()
     }
 
     private fun startTimerTask() {
-        timer = Timer()
-        val batteryManager: BatteryManager =
-            this.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
         if (!isTimerRunning) {
             isTimerRunning = true
+            timer = Timer()
+            val batteryManager: BatteryManager =
+                this.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
             val notificationManager: NotificationManager =
                 this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             timer.schedule(object : TimerTask() {
@@ -107,13 +113,14 @@ class ForegroundService : Service() {
                         1,
                         updateNotificationInfo(
                             resources.getString(R.string.default_channel),
-                            isOnGoing = false,
+                            isOnGoing = true,
                             isAlertOnce = true,
                             title = resources.getString(R.string.yet_another_battery_notifier),
                             content = currentNow.toString(),
                             icon = R.drawable.notification_charging
                         )
                     )
+                    Log.v("RUNNING", "timer task")
                 }
             }, 0, 5000L)
         }
@@ -184,9 +191,12 @@ class ForegroundService : Service() {
                     isLevelReceiver = true
                 }
 
-                Log.v("==CHARGING ALT==", "Screen on")
+                Log.v("==CHARGING ALT==", "charging")
             } else if ("android.intent.action.ACTION_POWER_DISCONNECTED" == p1.action) {
-                Log.v("==DISCHARGED ALT==", "Screen off")
+                Log.v("==DISCHARGED ALT==", "not charging")
+                val notificationManager: NotificationManager =
+                    p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notificationManager.cancel(2)
                 stopTimerTask()
                 if (isScreenOnReceiver) {
                     unregisterReceiver(screenReceiver)

@@ -4,8 +4,11 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
+import android.provider.ContactsContract.Intents.Insert.ACTION
+import android.provider.SyncStateContract
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import android.util.Log
 
 class QSTileService: TileService() {
 
@@ -28,18 +31,27 @@ class QSTileService: TileService() {
             applicationContext.startForegroundService(intent)
             tile.state = Tile.STATE_ACTIVE
 
-
-
         }else{
+            Log.v("QST", "trying to stop service")
             applicationContext.stopService(intent)
             tile.state = Tile.STATE_INACTIVE
         }
         tile.updateTile()
     }
 
+    override fun onStartListening() {
+        super.onStartListening()
+        val tile = qsTile
+
+        if (!ForegroundService.isForegroundServiceRunning()){
+            tile.state = Tile.STATE_INACTIVE
+        }else{
+            tile.state = Tile.STATE_ACTIVE
+        }
+        tile.updateTile()
+    }
+
     private fun createNotificationChannel(name:String, descriptionText: String) {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val channel = NotificationChannel(name, name, importance).apply {
             description = descriptionText
