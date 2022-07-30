@@ -7,4 +7,11 @@
     <string name="default_channel_description">This channel is for the on going notification when foreground service is running whick is nessery for the app\'s function.</string>
     <string name="channel_notify">Charged Notification</string>
     <string name="channel_notify_description">Channel for charged notification.</string>
+    <string name="settings">Settings</string>
+    <string name="YABN_settings">YABN Settings</string>
+    <string name="channel_settings">Settings</string>
+    <string name="channel_settings_description">Notification channel for Settings.</string>
+    <string name="always_show_current">Always Show Current</string>
+    <string name="frequency">Frequency</string>
+    <string name="disable_auto_boot">Disable Auto Boot</string>
 </resources>

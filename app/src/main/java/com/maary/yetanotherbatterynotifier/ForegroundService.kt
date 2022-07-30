@@ -1,7 +1,10 @@
-package com.example.yetanotherbatterynotifier
+package com.maary.yetanotherbatterynotifier
 
 import android.app.Notification
+import android.app.Notification.EXTRA_NOTIFICATION_ID
+import android.app.Notification.FLAG_LOCAL_ONLY
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -47,7 +50,8 @@ class ForegroundService : Service() {
             isAlertOnce = true,
             title = resources.getString(R.string.yet_another_battery_notifier),
             content = resources.getString(R.string.yet_another_battery_notifier_is_running),
-            icon = R.drawable.notification_not_charging
+            icon = R.drawable.notification_not_charging,
+            withAction = true
         )
 
         Log.v("STATE", "foreground service")
@@ -117,7 +121,8 @@ class ForegroundService : Service() {
                             isAlertOnce = true,
                             title = resources.getString(R.string.yet_another_battery_notifier),
                             content = currentNow.toString(),
-                            icon = R.drawable.notification_charging
+                            icon = R.drawable.notification_charging,
+                            withAction = true
                         )
                     )
                     Log.v("RUNNING", "timer task")
@@ -139,7 +144,8 @@ class ForegroundService : Service() {
             isAlertOnce = true,
             title = resources.getString(R.string.yet_another_battery_notifier),
             content = resources.getString(R.string.yet_another_battery_notifier_is_running),
-            icon = R.drawable.notification_not_charging
+            icon = R.drawable.notification_not_charging,
+            withAction = true
         )
         val notificationManager: NotificationManager =
             this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -226,7 +232,8 @@ class ForegroundService : Service() {
                             isAlertOnce = false,
                             title = resources.getString(R.string.yet_another_battery_notifier),
                             content = resources.getString(R.string.charged),
-                            icon = R.drawable.notification_charging
+                            icon = R.drawable.notification_charging,
+                            withAction = false
                         )
                     )
                 }
@@ -234,16 +241,17 @@ class ForegroundService : Service() {
         }
     }
 
-    private fun updateNotificationInfo(
+    fun updateNotificationInfo(
         channelId: String,
         isOnGoing: Boolean,
         isAlertOnce: Boolean,
         title: String,
         content: String,
-        icon: Int
+        icon: Int,
+        withAction: Boolean
     ): Notification {
 
-        return NotificationCompat.Builder(this, channelId)
+        val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setOngoing(isOnGoing)
             .setSmallIcon(icon)
             .setShowWhen(false)
@@ -251,7 +259,23 @@ class ForegroundService : Service() {
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setOnlyAlertOnce(isAlertOnce)
             .setContentText(content)
-            .build();
+
+        if (withAction){
+            val settingsIntent = Intent(this, SettingsReceiver::class.java).apply {
+                action = "com.maary.yetanotherbatterynotifier.SettingsReceiver"
+            }
+            val snoozePendingIntent: PendingIntent =
+                PendingIntent.getBroadcast(this, 0, settingsIntent, PendingIntent.FLAG_IMMUTABLE)
+
+            val action : NotificationCompat.Action = NotificationCompat.Action.Builder(
+                R.drawable.ic_baseline_settings_24,
+                resources.getString(R.string.settings),
+                snoozePendingIntent
+            ).build()
+            notificationBuilder.addAction(action)
+        }
+
+        return notificationBuilder.build()
 
     }
 }

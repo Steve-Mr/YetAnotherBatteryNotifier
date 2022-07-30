@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.yetanotherbatterynotifier">
+    package="com.maary.yetanotherbatterynotifier">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
@@ -25,7 +25,7 @@
         tools:targetApi="31">
 <!--        android:banner="TODO">-->
         <activity
-            android:name=".MainActivity"
+            android:name="com.maary.yetanotherbatterynotifier.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -34,7 +34,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".ForegroundService"
+        <service android:name="com.maary.yetanotherbatterynotifier.ForegroundService"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
@@ -44,7 +44,7 @@
             </intent-filter>
         </service>
 
-        <service android:name=".QSTileService"
+        <service android:name="com.maary.yetanotherbatterynotifier.QSTileService"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
             android:icon="@drawable/tile"
             android:exported="true">
@@ -53,13 +53,23 @@
             </intent-filter>
         </service>
 
-        <receiver android:name=".BootCompleteReceiver"
+        <receiver android:name="com.maary.yetanotherbatterynotifier.BootCompleteReceiver"
             android:exported="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".SettingsReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver"/>
+                <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver.NotCharging"/>
+                <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency"/>
+                <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver.AutoBoot"/>
             </intent-filter>
         </receiver>
     </application>

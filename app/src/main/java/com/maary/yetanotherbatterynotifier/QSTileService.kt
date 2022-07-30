@@ -1,11 +1,9 @@
-package com.example.yetanotherbatterynotifier
+package com.maary.yetanotherbatterynotifier
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.provider.ContactsContract.Intents.Insert.ACTION
-import android.provider.SyncStateContract
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.util.Log
@@ -26,6 +24,10 @@ class QSTileService: TileService() {
             createNotificationChannel(
                 resources.getString(R.string.channel_notify),
                 resources.getString(R.string.channel_notify_description)
+            )
+            createNotificationChannel(
+                resources.getString(R.string.channel_settings),
+                resources.getString(R.string.channel_settings_description)
             )
             
             applicationContext.startForegroundService(intent)

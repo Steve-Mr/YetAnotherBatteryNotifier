@@ -1,4 +1,4 @@
-package com.example.yetanotherbatterynotifier
+package com.maary.yetanotherbatterynotifier
 
 import android.content.BroadcastReceiver
 import android.content.Context

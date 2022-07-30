@@ -1,10 +1,5 @@
-package com.example.yetanotherbatterynotifier
+package com.maary.yetanotherbatterynotifier
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.content.ClipDescription
-import android.content.Context
-import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 
