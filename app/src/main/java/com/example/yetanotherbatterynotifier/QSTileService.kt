@@ -16,8 +16,6 @@ class QSTileService: TileService() {
 
         val intent = Intent(this, ForegroundService::class.java)
 
-        val chargingReceiver = BatteryChargingReceiver()
-
         if (!ForegroundService.isForegroundServiceRunning()){
             createNotificationChannel(
                 resources.getString(R.string.default_channel),
@@ -28,16 +26,10 @@ class QSTileService: TileService() {
                 resources.getString(R.string.channel_notify_description)
             )
 
-            val filter = IntentFilter()
-            filter.addAction(Intent.ACTION_POWER_CONNECTED)
-            filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
-            registerReceiver(chargingReceiver, filter)
-
             applicationContext.startForegroundService(intent)
             tile.state = Tile.STATE_ACTIVE
 
         }else{
-            unregisterReceiver(chargingReceiver)
             applicationContext.stopService(intent)
             tile.state = Tile.STATE_INACTIVE
         }

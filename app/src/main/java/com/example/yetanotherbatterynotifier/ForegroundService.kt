@@ -17,6 +17,8 @@ import java.util.*
 
 class ForegroundService : Service() {
 
+    private val batteryChargingReceiver = BatteryChargingReceiver()
+
     private var timer = Timer()
     private var isTimerRunning = false
     private var isScreenOnReceiver = false
@@ -77,16 +79,18 @@ class ForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-//        val filter = IntentFilter()
-//        filter.addAction(Intent.ACTION_POWER_CONNECTED)
-//        filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+        val filter = IntentFilter()
+        filter.addAction(Intent.ACTION_POWER_CONNECTED)
+        filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+        registerReceiver(batteryChargingReceiver, filter)
 //        registerReceiver(chargingReceiver, filter)
     }
 
     override fun onDestroy() {
         super.onDestroy()
         isForegroundServiceRunning = false
-        unregisterReceiver(chargingReceiver)
+//        unregisterReceiver(chargingReceiver)
+        unregisterReceiver(batteryChargingReceiver)
         if (isLevelReceiver) unregisterReceiver(levelReceiver)
         if (isScreenOnReceiver) unregisterReceiver(screenReceiver)
     }
