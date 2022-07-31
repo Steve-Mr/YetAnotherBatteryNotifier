@@ -66,6 +66,7 @@ class SettingsReceiver: BroadcastReceiver() {
             val actions: MutableList<NotificationCompat.Action> = ArrayList()
             actionCharging?.let { actions.add(it) }
             actionFrequency?.let { actions.add(it) }
+            actionCancel?.let { actions.add(it) }
 //            actionAutoBoot?.let { actions.add(it) }
 
             p0?.let { notify(it,actions) }
