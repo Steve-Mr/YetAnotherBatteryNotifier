@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="default_channel">前台服务</string>
+    <string name="default_channel_description">本通道用于显示应用的前台通知。</string>
+    <string name="channel_notify">充电完成通知</string>
+    <string name="channel_notify_description">本通道用于显示充电完成通知。</string>
+    <string name="settings">设置</string>
+    <string name="YABN_settings">YABN设置</string>
+    <string name="channel_settings">设置</string>
+    <string name="channel_settings_description">本通道用于显示承担设置功能的通知。</string>
+    <string name="always_show_current">电流常显</string>
+    <string name="frequency">更新频率</string>
+    <string name="disable_auto_boot">关闭自启</string>
+    <string name="one_sec">1秒</string>
+    <string name="two_sec">2秒</string>
+    <string name="five_sec">5秒</string>
+    <string name="one_min">1分钟</string>
+    <string name="qstile_inactive">YABN 未运行</string>
+    <string name="qstile_active">YABN 正在运行</string>
+    <string name="only_charging_current">仅充电更新</string>
+    <string name="need_restart_service">请重启 YABN 服务</string>
+    <string name="cancel">取消</string>
+    <string name="yet_another_battery_notifier_is_running">Yet Another Battery Notifier 正在运行</string>
+    <string name="charged">已充电至 %1$d%2$s.</string>
+</resources>

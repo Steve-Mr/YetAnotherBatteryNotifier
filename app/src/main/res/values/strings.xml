@@ -1,23 +1,31 @@
 <resources>
-    <string name="app_name">Yet Another Battery Notifier</string>
-    <string name="yet_another_battery_notifier">Yet Another Battery Notifier</string>
-    <string name="yet_another_battery_notifier_is_running">Yet Anohter Battery Notifier is running.</string>
-    <string name="charged">"Your phone has charged to "</string>
+    <string name="app_name" translatable="false">Yet Another Battery Notifier</string>
+    <string name="yet_another_battery_notifier" translatable="false">Yet Another Battery Notifier</string>
+    <string name="yet_another_battery_notifier_is_running">Yet Another Battery Notifier is running.</string>
     <string name="default_channel">Foreground Service</string>
-    <string name="default_channel_description">This channel is for the on going notification when foreground service is running whick is nessery for the app\'s function.</string>
+    <string name="default_channel_description">This channel is for the on going notification when foreground service is running which is necessary for the app\'s function.</string>
     <string name="channel_notify">Charged Notification</string>
     <string name="channel_notify_description">Channel for charged notification.</string>
     <string name="settings">Settings</string>
     <string name="YABN_settings">YABN Settings</string>
     <string name="channel_settings">Settings</string>
     <string name="channel_settings_description">Notification channel for Settings.</string>
-    <string name="always_show_current">Always Show Current</string>
+    <string name="always_show_current">Always Monitor</string>
     <string name="frequency">Frequency</string>
     <string name="disable_auto_boot">Disable Auto Boot</string>
     <string name="one_sec">1s</string>
     <string name="two_sec">2s</string>
     <string name="five_sec">5s</string>
-    <string name="one_min">1m</string>
-    <string name="name_shared_pref">com.maary.yetanotherbatterynotifier.pref</string>
-    <string name="shared_pref_frequency">frequency</string>
+    <string name="one_min">1min</string>
+    <string name="name_shared_pref" translatable="false">com.maary.yetanotherbatterynotifier.pref</string>
+    <string name="shared_pref_frequency" translatable="false">frequency</string>
+    <string name="qstile_inactive">YABN not running</string>
+    <string name="qstile_active">YABN is running</string>
+    <string name="boolean_always_show_speed" translatable="false">Always show speed Boolean</string>
+    <string name="only_charging_current">Monitor when charging</string>
+    <string name="need_restart_service">Please restart YABN service</string>
+    <string name="cancel">Cancel</string>
+    <string name="string_monitoring" translatable="false">%1$s mA | %2$s °C</string>
+    <string name="charged">Your phone has been charged to %1$d%2$s.</string>
+
 </resources>

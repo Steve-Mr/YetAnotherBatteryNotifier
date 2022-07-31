@@ -45,7 +45,7 @@ class ForegroundService : Service() {
             resources.getString(R.string.default_channel),
             isOnGoing = true,
             isAlertOnce = true,
-            title = resources.getString(R.string.yet_another_battery_notifier),
+            title = "",//resources.getString(R.string.yet_another_battery_notifier),
             content = resources.getString(R.string.yet_another_battery_notifier_is_running),
             icon = R.drawable.notification_not_charging,
             withAction = true
@@ -78,8 +78,20 @@ class ForegroundService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        var filter = IntentFilter()
         sharedPref = getSharedPreferences(getString(R.string.name_shared_pref), Context.MODE_PRIVATE)
-        val filter = IntentFilter()
+        if (sharedPref.getBoolean(getString(R.string.boolean_always_show_speed), false)){
+            if (!isScreenOnReceiver) {
+                filter.addAction(Intent.ACTION_SCREEN_ON)
+                filter.addAction(Intent.ACTION_SCREEN_OFF)
+                registerReceiver(screenReceiver, filter)
+                isScreenOnReceiver = true
+                filter = IntentFilter()
+            }
+            if (getSystemService<PowerManager>()?.isInteractive == true){
+                startTimerTask()
+            }
+        }
         filter.addAction(Intent.ACTION_POWER_CONNECTED)
         filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
         registerReceiver(chargingReceiver, filter)
@@ -107,18 +119,25 @@ class ForegroundService : Service() {
                 this.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
             val notificationManager: NotificationManager =
                 this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
             timer.schedule(object : TimerTask() {
                 override fun run() {
+                    val batteryStatus: Intent? = registerReceiver(null,
+                        IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                    )
                     val currentNow: Long =
-                        batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+                        -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
                     notificationManager.notify(
                         1,
                         updateNotificationInfo(
                             resources.getString(R.string.default_channel),
                             isOnGoing = true,
                             isAlertOnce = true,
-                            title = resources.getString(R.string.yet_another_battery_notifier),
-                            content = currentNow.toString(),
+                            title = "",//resources.getString(R.string.yet_another_battery_notifier),
+                            content = getString(R.string.string_monitoring, currentNow.toString(),
+                                (batteryStatus?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)
+                                        ?.div(10) ?: 0).toString()
+                            ),
                             icon = R.drawable.notification_charging,
                             withAction = true
                         )
@@ -140,7 +159,7 @@ class ForegroundService : Service() {
             resources.getString(R.string.default_channel),
             isOnGoing = false,
             isAlertOnce = true,
-            title = resources.getString(R.string.yet_another_battery_notifier),
+            title = "",//resources.getString(R.string.yet_another_battery_notifier),
             content = resources.getString(R.string.yet_another_battery_notifier_is_running),
             icon = R.drawable.notification_not_charging,
             withAction = true
@@ -201,14 +220,16 @@ class ForegroundService : Service() {
                 val notificationManager: NotificationManager =
                     p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(2)
-                stopTimerTask()
-                if (isScreenOnReceiver) {
-                    unregisterReceiver(screenReceiver)
-                    isScreenOnReceiver = false
-                }
                 if (isLevelReceiver) {
                     unregisterReceiver(levelReceiver)
                     isLevelReceiver = false
+                }
+                if (!sharedPref.getBoolean(getString(R.string.boolean_always_show_speed), false)){
+                    stopTimerTask()
+                    if (isScreenOnReceiver) {
+                        unregisterReceiver(screenReceiver)
+                        isScreenOnReceiver = false
+                    }
                 }
 
             }
@@ -219,7 +240,7 @@ class ForegroundService : Service() {
         override fun onReceive(p0: Context?, p1: Intent?) {
             val level: Int? = p1?.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
             if (level != null) {
-                if (level == 47 || level == 50) {
+                if (level == 80 || level == 85) {
                     val notificationManager: NotificationManager =
                         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     notificationManager.notify(
@@ -228,8 +249,8 @@ class ForegroundService : Service() {
                             resources.getString(R.string.channel_notify),
                             isOnGoing = false,
                             isAlertOnce = false,
-                            title = resources.getString(R.string.yet_another_battery_notifier),
-                            content = resources.getString(R.string.charged),
+                            title = resources.getString(R.string.charged, level, "%"),
+                            content = "",
                             icon = R.drawable.notification_charging,
                             withAction = false
                         )
