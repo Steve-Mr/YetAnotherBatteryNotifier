@@ -48,7 +48,8 @@ class ForegroundService : Service() {
             title = "",//resources.getString(R.string.yet_another_battery_notifier),
             content = resources.getString(R.string.yet_another_battery_notifier_is_running),
             icon = R.drawable.notification_not_charging,
-            withAction = true
+            withAction = true,
+            priority = NotificationCompat.PRIORITY_MIN
         )
 
         Log.v("STATE", "foreground service")
@@ -139,7 +140,8 @@ class ForegroundService : Service() {
                                         ?.div(10) ?: 0).toString()
                             ),
                             icon = R.drawable.notification_charging,
-                            withAction = true
+                            withAction = true,
+                            priority = NotificationCompat.PRIORITY_MIN
                         )
                     )
                     Log.v("RUNNING", "timer task")
@@ -162,7 +164,8 @@ class ForegroundService : Service() {
             title = "",//resources.getString(R.string.yet_another_battery_notifier),
             content = resources.getString(R.string.yet_another_battery_notifier_is_running),
             icon = R.drawable.notification_not_charging,
-            withAction = true
+            withAction = true,
+            priority = NotificationCompat.PRIORITY_MIN
         )
         val notificationManager: NotificationManager =
             this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -252,7 +255,8 @@ class ForegroundService : Service() {
                             title = resources.getString(R.string.charged, level, "%"),
                             content = "",
                             icon = R.drawable.notification_charging,
-                            withAction = false
+                            withAction = false,
+                            priority = NotificationCompat.PRIORITY_DEFAULT
                         )
                     )
                 }
@@ -267,7 +271,8 @@ class ForegroundService : Service() {
         title: String,
         content: String,
         icon: Int,
-        withAction: Boolean
+        withAction: Boolean,
+        priority: Int
     ): Notification {
 
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
@@ -278,6 +283,7 @@ class ForegroundService : Service() {
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setOnlyAlertOnce(isAlertOnce)
             .setContentText(content)
+            .setPriority(priority)
 
         if (withAction){
             val settingsIntent = Intent(this, SettingsReceiver::class.java).apply {
