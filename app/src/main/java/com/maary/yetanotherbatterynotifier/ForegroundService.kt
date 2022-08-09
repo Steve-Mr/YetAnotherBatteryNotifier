@@ -20,6 +20,10 @@ class ForegroundService : Service() {
     private var isScreenOnReceiver = false
     private var isLevelReceiver = false
 
+    val num_div = if(android.os.Build.MANUFACTURER.equals("realme", true) ||
+            android.os.Build.MANUFACTURER.equals("oppo", true) ||
+            android.os.Build.MANUFACTURER.equals("oneplus", true)) 1 else 1000
+
     val screenReceiver = ScreenReceiver()
     private val chargingReceiver = ChargingReceiver()
     val levelReceiver = BatteryLevelReceiver()
@@ -40,6 +44,11 @@ class ForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+
+        Log.v("BUILD MODEL", android.os.Build.MODEL)
+        Log.v("MANUFACTURER", android.os.Build.MANUFACTURER)
+        Log.v("BRAND", android.os.Build.BRAND)
+
 
         val notification = updateNotificationInfo(
             resources.getString(R.string.default_channel),
@@ -127,7 +136,7 @@ class ForegroundService : Service() {
                         IntentFilter(Intent.ACTION_BATTERY_CHANGED)
                     )
                     val currentNow: Long =
-                        -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+                        -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW).div(num_div)
                     notificationManager.notify(
                         1,
                         updateNotificationInfo(
