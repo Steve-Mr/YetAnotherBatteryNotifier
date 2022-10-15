@@ -51,6 +51,7 @@ android {
             universalApk false
         }
     }
+    namespace 'com.maary.yetanotherbatterynotifier'
 
 }
 
