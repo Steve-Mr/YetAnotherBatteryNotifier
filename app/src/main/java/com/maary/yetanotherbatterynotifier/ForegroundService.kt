@@ -83,7 +83,7 @@ class ForegroundService : Service() {
 
         isForegroundServiceRunning = true
 
-        return START_NOT_STICKY
+        return START_STICKY
     }
 
     override fun onCreate() {
