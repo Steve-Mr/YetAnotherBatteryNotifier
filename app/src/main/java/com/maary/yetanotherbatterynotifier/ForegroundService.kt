@@ -49,7 +49,6 @@ class ForegroundService : Service() {
         Log.v("MANUFACTURER", android.os.Build.MANUFACTURER)
         Log.v("BRAND", android.os.Build.BRAND)
 
-
         val notification = updateNotificationInfo(
             resources.getString(R.string.default_channel),
             isOnGoing = true,
