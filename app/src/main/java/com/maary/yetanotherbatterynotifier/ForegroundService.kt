@@ -167,7 +167,7 @@ class ForegroundService : Service() {
 
         val notification = updateNotificationInfo(
             resources.getString(R.string.default_channel),
-            isOnGoing = false,
+            isOnGoing = true,
             isAlertOnce = true,
             title = "",//resources.getString(R.string.yet_another_battery_notifier),
             content = resources.getString(R.string.yet_another_battery_notifier_is_running),
