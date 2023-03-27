@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 是否需要始终显示电流大小的开关 -->
+    <SwitchPreference
+        android:key="@string/boolean_always_show_speed"
+        android:title="@string/always_show_current"
+        android:summary="@string/always_show_current_summary"/>
+
+    <!-- 更新频率的选项列表 -->
+    <ListPreference
+        android:key="@string/shared_pref_frequency"
+        android:title="@string/frequency"
+        android:summary="@string/frequency_summary"
+        android:entries="@array/update_frequency_entries"
+        android:entryValues="@array/update_frequency_values"
+        android:defaultValue="3" />
+
+    <!-- 电流大小的比率调整选项列表 -->
+    <ListPreference
+        android:key="@string/shared_pref_ratio"
+        android:title="@string/current_scale"
+        android:summary="@string/fuck_android_oem_summary"
+        android:entries="@array/current_ratio_entries"
+        android:entryValues="@array/current_ratio_values"
+        android:defaultValue="1000" />
+
+</androidx.preference.PreferenceScreen>

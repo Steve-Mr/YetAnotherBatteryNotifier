@@ -20,8 +20,12 @@ class ForegroundService : Service() {
     private var isScreenOnReceiver = false
     private var isLevelReceiver = false
 
-    val num_div = if(android.os.Build.MANUFACTURER.equals("realme", true) ||
+//    private val sharedPreferences: SharedPreferences = getSharedPreferences(getString(R.string.name_shared_pref), Context.MODE_PRIVATE)
+
+    private val numDiv = if(android.os.Build.MANUFACTURER.equals("realme", true) ||
             android.os.Build.MANUFACTURER.equals("oppo", true)) 1 else 1000
+
+
 
     val screenReceiver = ScreenReceiver()
     private val chargingReceiver = ChargingReceiver()
@@ -133,8 +137,11 @@ class ForegroundService : Service() {
                     val batteryStatus: Intent? = registerReceiver(null,
                         IntentFilter(Intent.ACTION_BATTERY_CHANGED)
                     )
+                    val ratio = if (sharedPref.contains(getString(R.string.shared_pref_ratio))) sharedPref.getInt(getString(R.string.shared_pref_ratio), 1000)
+                    else numDiv
+
                     val currentNow: Long =
-                        -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW).div(num_div)
+                        -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW).div(ratio)
                     notificationManager.notify(
                         1,
                         updateNotificationInfo(

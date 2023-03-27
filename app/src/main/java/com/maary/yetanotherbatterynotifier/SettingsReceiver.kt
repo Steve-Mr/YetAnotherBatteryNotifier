@@ -76,11 +76,10 @@ class SettingsReceiver: BroadcastReceiver() {
         if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.NotCharging" == p1?.action) {
             val sharedPref =
                 p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE)?: return
-            val alwaysShowSpeedValue =  sharedPref?.getBoolean(p0.getString(R.string.boolean_always_show_speed), false)
+            val alwaysShowSpeedValue =
+                sharedPref.getBoolean(p0.getString(R.string.boolean_always_show_speed), false)
             with(sharedPref.edit()){
-                if (alwaysShowSpeedValue != null) {
-                    putBoolean(p0.getString(R.string.boolean_always_show_speed), !alwaysShowSpeedValue)
-                }
+                putBoolean(p0.getString(R.string.boolean_always_show_speed), !alwaysShowSpeedValue)
                 apply()
                 val notificationManager: NotificationManager =
                     p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
