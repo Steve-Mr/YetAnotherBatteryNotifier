@@ -9,20 +9,23 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 
-class SettingsReceiver: BroadcastReceiver() {
+class SettingsReceiver : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
         Log.v("SETTINGS", "received")
 
         if ("com.maary.yetanotherbatterynotifier.SettingsReceiver" == p1?.action) {
 
             val sharedPref =
-                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE)
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                )
 
             val alwaysShowSpeed =
                 sharedPref?.getBoolean(p0.getString(R.string.boolean_always_show_speed), false)
 
             var actionChargingTextR = R.string.always_show_current
-            if (alwaysShowSpeed == true){
+            if (alwaysShowSpeed == true) {
                 actionChargingTextR = R.string.only_charging_current
             }
 
@@ -32,7 +35,7 @@ class SettingsReceiver: BroadcastReceiver() {
                     SettingsReceiver::class.java,
                     "com.maary.yetanotherbatterynotifier.SettingsReceiver.NotCharging",
                     actionChargingTextR
-                    )
+                )
             }
 
             val actionFrequency = p0?.let {
@@ -45,14 +48,14 @@ class SettingsReceiver: BroadcastReceiver() {
             }
 
 
-            val actionAutoBoot = p0?.let {
-                generateAction(
-                    it,
-                    SettingsReceiver::class.java,
-                    "com.maary.yetanotherbatterynotifier.SettingsReceiver.AutoBoot",
-                    R.string.disable_auto_boot
-                )
-            }
+//            val actionAutoBoot = p0?.let {
+//                generateAction(
+//                    it,
+//                    SettingsReceiver::class.java,
+//                    "com.maary.yetanotherbatterynotifier.SettingsReceiver.AutoBoot",
+//                    R.string.disable_auto_boot
+//                )
+//            }
 
             val actionCancel = p0?.let {
                 generateAction(
@@ -69,22 +72,26 @@ class SettingsReceiver: BroadcastReceiver() {
             actionCancel?.let { actions.add(it) }
 //            actionAutoBoot?.let { actions.add(it) }
 
-            p0?.let { notify(it,actions) }
+            p0?.let { notify(it, actions) }
 
         }
 
         if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.NotCharging" == p1?.action) {
             val sharedPref =
-                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE)?: return
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
             val alwaysShowSpeedValue =
                 sharedPref.getBoolean(p0.getString(R.string.boolean_always_show_speed), false)
-            with(sharedPref.edit()){
+            with(sharedPref.edit()) {
                 putBoolean(p0.getString(R.string.boolean_always_show_speed), !alwaysShowSpeedValue)
                 apply()
                 val notificationManager: NotificationManager =
                     p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(3)
-                Toast.makeText(p0,p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT).show()
+                Toast.makeText(p0, p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT)
+                    .show()
             }
             Log.v("SETTINGS", "show not charging ")
         }
@@ -130,22 +137,26 @@ class SettingsReceiver: BroadcastReceiver() {
             actionOneMin?.let { actions.add(it) }
 
             val sharedPref =
-                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE)?: return
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
 
-            val sharedPrefFrequency = sharedPref.getLong(p0.getString(R.string.shared_pref_frequency), 5000L)
-            if (sharedPrefFrequency == 1000L){
+            val sharedPrefFrequency =
+                sharedPref.getLong(p0.getString(R.string.shared_pref_frequency), 5000L)
+            if (sharedPrefFrequency == 1000L) {
                 actions.removeAt(0)
             }
-            if (sharedPrefFrequency == 2000L){
+            if (sharedPrefFrequency == 2000L) {
                 actions.removeAt(1)
             }
-            if (sharedPrefFrequency == 5000L){
+            if (sharedPrefFrequency == 5000L) {
                 actions.removeAt(2)
             }
-            if (sharedPrefFrequency == 60000L){
+            if (sharedPrefFrequency == 60000L) {
                 actions.removeAt(3)
             }
-            notify(p0,actions)
+            notify(p0, actions)
 
         }
 
@@ -154,71 +165,161 @@ class SettingsReceiver: BroadcastReceiver() {
             // todo; 写入 qstileservice 查询
         }
 
-        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.OneSec" == p1?.action){
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.OneSec" == p1?.action) {
             Log.v("ONE SEC", "ONE SEC")
             val sharedPref =
-                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE) ?: return
-            with(sharedPref.edit()){
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
+            with(sharedPref.edit()) {
                 putLong(p0.getString(R.string.shared_pref_frequency), 1000L)
                 apply()
             }
             val notificationManager: NotificationManager =
                 p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(3)
-            Toast.makeText(p0,p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT).show()
+            Toast.makeText(p0, p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT)
+                .show()
 
         }
-        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.TwoSec" == p1?.action){
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.TwoSec" == p1?.action) {
 //            Log.v("ONE SEC", " SEC")
             val sharedPref =
-                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE) ?: return
-            with(sharedPref.edit()){
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
+            with(sharedPref.edit()) {
                 putLong(p0.getString(R.string.shared_pref_frequency), 2000L)
                 apply()
             }
             val notificationManager: NotificationManager =
                 p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(3)
-            Toast.makeText(p0,p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT).show()
+            Toast.makeText(p0, p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT)
+                .show()
 
         }
-        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.FiveSec" == p1?.action){
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.FiveSec" == p1?.action) {
 //            Log.v("ONE SEC", "ONE SEC")
             val sharedPref =
-                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE) ?: return
-            with(sharedPref.edit()){
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
+            with(sharedPref.edit()) {
                 putLong(p0.getString(R.string.shared_pref_frequency), 5000L)
                 apply()
             }
             val notificationManager: NotificationManager =
                 p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(3)
-            Toast.makeText(p0,p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT).show()
+            Toast.makeText(p0, p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT)
+                .show()
 
         }
-        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.OneMin" == p1?.action){
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Frequency.OneMin" == p1?.action) {
 //            Log.v("ONE SEC", "ONE SEC")
             val sharedPref =
-                p0?.getSharedPreferences(p0.getString(R.string.name_shared_pref), Context.MODE_PRIVATE) ?: return
-            with(sharedPref.edit()){
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
+            with(sharedPref.edit()) {
                 putLong(p0.getString(R.string.shared_pref_frequency), 60000L)
                 apply()
             }
             val notificationManager: NotificationManager =
                 p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(3)
-            Toast.makeText(p0,p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT).show()
+            Toast.makeText(p0, p0.getString(R.string.need_restart_service), Toast.LENGTH_SHORT)
+                .show()
 
         }
-        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Cancel" == p1?.action){
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.Cancel" == p1?.action) {
             val notificationManager: NotificationManager =
                 p0?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.cancel(3)
 
         }
 
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.fuckOEM" == p1?.action){
+
+            val actionFuckingHigh = p0?.let {
+                generateAction(
+                    it,
+                    SettingsReceiver::class.java,
+                    "com.maary.yetanotherbatterynotifier.SettingsReceiver.fuckOEM.tooHigh",
+                    R.string.fucking_high
+                )
+            }
+
+            val actionFuckingLow = p0?.let {
+                generateAction(
+                    it,
+                    SettingsReceiver::class.java,
+                    "com.maary.yetanotherbatterynotifier.SettingsReceiver.fuckOEM.tooLow",
+                    R.string.fucking_low
+                )
+            }
+
+            val actionCancel = p0?.let {
+                generateAction(
+                    it,
+                    SettingsReceiver::class.java,
+                    "com.maary.yetanotherbatterynotifier.SettingsReceiver.Cancel",
+                    R.string.cancel
+                )
+            }
+
+            val actions: MutableList<NotificationCompat.Action> = ArrayList()
+            actionFuckingHigh?.let { actions.add(it) }
+            actionFuckingLow?.let { actions.add(it) }
+            actionCancel?.let { actions.add(it) }
+
+            p0?.let { notify(it, actions) }
 
         }
+
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.fuckOEM.tooHigh" == p1?.action) {
+            val sharedPref =
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
+
+            with(sharedPref.edit()) {
+                putInt(p0.getString(R.string.shared_pref_ratio), 1000)
+                apply()
+            }
+
+            val notificationManager: NotificationManager =
+                p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(3)
+
+        }
+
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.fuckOEM.tooLow" == p1?.action) {
+            val sharedPref =
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
+
+            with(sharedPref.edit()) {
+                putInt(p0.getString(R.string.shared_pref_ratio), 1)
+                apply()
+            }
+
+            val notificationManager: NotificationManager =
+                p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(3)
+
+        }
+
+
+    }
 
     private fun generateAction(
         context: Context,
@@ -243,10 +344,14 @@ class SettingsReceiver: BroadcastReceiver() {
 
     private fun notify(
         context: Context,
-        actions: List<NotificationCompat.Action>){
+        actions: List<NotificationCompat.Action>
+    ) {
 
         val notificationSettings = context.let {
-            NotificationCompat.Builder(it, context.resources?.getString(R.string.channel_settings)!!)
+            NotificationCompat.Builder(
+                it,
+                context.resources?.getString(R.string.channel_settings)!!
+            )
                 .setOngoing(true)
                 .setSmallIcon(R.drawable.ic_baseline_settings_24)
                 .setShowWhen(false)
@@ -254,7 +359,7 @@ class SettingsReceiver: BroadcastReceiver() {
                 .setOnlyAlertOnce(true)
         }
 
-        for (action in actions){
+        for (action in actions) {
             notificationSettings.addAction(action)
         }
 
@@ -264,4 +369,4 @@ class SettingsReceiver: BroadcastReceiver() {
         notificationManager.notify(3, notificationSettings.build())
     }
 
-    }
+}

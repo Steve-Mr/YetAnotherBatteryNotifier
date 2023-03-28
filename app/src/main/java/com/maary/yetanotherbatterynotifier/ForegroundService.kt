@@ -306,12 +306,27 @@ class ForegroundService : Service() {
             val snoozePendingIntent: PendingIntent =
                 PendingIntent.getBroadcast(this, 0, settingsIntent, PendingIntent.FLAG_IMMUTABLE)
 
-            val action : NotificationCompat.Action = NotificationCompat.Action.Builder(
+            val actionSettings : NotificationCompat.Action = NotificationCompat.Action.Builder(
                 R.drawable.ic_baseline_settings_24,
                 resources.getString(R.string.settings),
                 snoozePendingIntent
             ).build()
-            notificationBuilder.addAction(action)
+
+            val fuckOEMIntent = Intent(this, SettingsReceiver::class.java).apply {
+                action = "com.maary.yetanotherbatterynotifier.SettingsReceiver.fuckOEM"
+            }
+
+            val fuckOEMPendingIntent: PendingIntent =
+                PendingIntent.getBroadcast(this, 0, fuckOEMIntent, PendingIntent.FLAG_IMMUTABLE)
+
+            val actionFuckOEM : NotificationCompat.Action = NotificationCompat.Action.Builder(
+                R.drawable.ic_fuck_oem,
+                resources.getString(R.string.fuck_oem),
+                fuckOEMPendingIntent
+            ).build()
+
+            notificationBuilder.addAction(actionSettings)
+            notificationBuilder.addAction(actionFuckOEM)
         }
 
         return notificationBuilder.build()
