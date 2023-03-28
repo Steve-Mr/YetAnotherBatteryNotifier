@@ -22,4 +22,11 @@
     <string name="cancel">取消</string>
     <string name="yet_another_battery_notifier_is_running">Yet Another Battery Notifier 正在运行</string>
     <string name="charged">已充电至 %1$d%2$s.</string>
+    <string name="current_scale">电流太他妈的大！/小！了</string>
+    <string name="always_show_current_summary">即使没有充电也始终显示电流大小</string>
+    <string name="frequency_summary">YABN 应该多久更新一次数据？</string>
+    <string name="fuck_android_oem_summary">这群傻逼 OEM 甚至对于通用 API 都做不好完整支持。来这修理然后操他们妈的。太大了就选个大的，太低了就选小的。k</string>
+    <string name="fuck_oem">值太…</string>
+    <string name="fucking_high">高！</string>
+    <string name="fucking_low">低！</string>
 </resources>

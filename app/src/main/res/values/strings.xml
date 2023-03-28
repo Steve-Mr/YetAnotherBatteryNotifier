@@ -30,10 +30,10 @@
     <string name="current_scale">Current is so fucking LARGE/SMALL!</string>
     <string name="always_show_current_summary">Always show battery current even when discharging.</string>
     <string name="frequency_summary">How often should YABN update battery data?</string>
-    <string name="fuck_android_oem_summary">These stupid OEMs can\'t even implement a universal API properly. Come here and fix it then fuck them. If it\'s too big, choose a smaller multiplier; if it\'s too small, choose a larger multiplier.</string>
-    <string name="shared_pref_ratio">ratio</string>
-    <string name="fuck_oem">Value too ...</string>
-    <string name="fucking_high">High</string>
-    <string name="fucking_low">Low</string>
+    <string name="fuck_android_oem_summary">These stupid OEMs can\'t even implement a universal API properly. Come here and fix it then fuck them. If it\'s too big, choose a larger multiplier; if it\'s too small, choose a smaller multiplier.</string>
+    <string name="shared_pref_ratio" translatable="false">ratio</string>
+    <string name="fuck_oem">Value too …</string>
+    <string name="fucking_high">High!</string>
+    <string name="fucking_low">Low!</string>
 
 </resources>
