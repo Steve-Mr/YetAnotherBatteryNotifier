@@ -35,5 +35,8 @@
     <string name="fuck_oem">Value too …</string>
     <string name="fucking_high">High!</string>
     <string name="fucking_low">Low!</string>
+    <string name="dnd_1hour">DND 1h</string>
+    <string name="dnd">dnd\n</string>
+    <string name="dnd_enable_time">dnd_enabled_time\n</string>
 
 </resources>

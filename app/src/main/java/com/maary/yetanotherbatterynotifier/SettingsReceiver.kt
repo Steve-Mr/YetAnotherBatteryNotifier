@@ -318,6 +318,25 @@ class SettingsReceiver : BroadcastReceiver() {
 
         }
 
+        if ("com.maary.yetanotherbatterynotifier.SettingsReceiver.dnd" == p1?.action) {
+            val sharedPref =
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
+
+            with(sharedPref.edit()) {
+                putBoolean(p0.getString(R.string.dnd), true)
+                apply()
+            }
+
+            with(sharedPref.edit()) {
+                putLong(p0.getString(R.string.dnd_enable_time), System.currentTimeMillis())
+                apply()
+            }
+
+        }
+
 
     }
 
