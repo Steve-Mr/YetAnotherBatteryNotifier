@@ -265,16 +265,6 @@ class ForegroundService : Service() {
                             Context.MODE_PRIVATE
                         ) ?: return
 
-                    with(sharedPref.edit()) {
-                        putBoolean(p0.getString(R.string.dnd), true)
-                        apply()
-                    }
-
-                    with(sharedPref.edit()) {
-                        putLong(p0.getString(R.string.dnd_enable_time), System.currentTimeMillis())
-                        apply()
-                    }
-
                     if (sharedPref.getBoolean(p0.getString(R.string.dnd), false)){
                         val dndSetTime = sharedPref.getLong(p0.getString(R.string.dnd_enable_time), 0)
                         if ((System.currentTimeMillis() - dndSetTime) < 1000*60*60){
@@ -356,9 +346,25 @@ class ForegroundService : Service() {
             val sleepPendingIntent: PendingIntent =
                 PendingIntent.getBroadcast(this, 0, sleepIntent, PendingIntent.FLAG_IMMUTABLE)
 
+            var dndTitleResource = R.string.dnd_1hour
+
+            if (sharedPref.getBoolean(getString(R.string.dnd), false)){
+                val dndSetTime = sharedPref.getLong(getString(R.string.dnd_enable_time), 0)
+                if ((System.currentTimeMillis() - dndSetTime) < 1000*60*60){
+                    Log.v("==YABN==", dndSetTime.toString())
+                    Log.v("==YABN==", System.currentTimeMillis().toString())
+                    dndTitleResource = R.string.dnd_ing
+                }else{
+                    with(sharedPref.edit()){
+                        putBoolean(getString(R.string.dnd), false)
+                        apply()
+                    }
+                }
+            }
+
             val actionSleep : NotificationCompat.Action = NotificationCompat.Action.Builder(
                 R.drawable.ic_dnd,
-                resources.getString(R.string.dnd_1hour),
+                resources.getString(dndTitleResource),
                 sleepPendingIntent
             ).build()
 

@@ -325,15 +325,21 @@ class SettingsReceiver : BroadcastReceiver() {
                     Context.MODE_PRIVATE
                 ) ?: return
 
-            with(sharedPref.edit()) {
-                putBoolean(p0.getString(R.string.dnd), true)
-                apply()
+            if (sharedPref.getBoolean(p0.getString(R.string.dnd), false)){
+                with(sharedPref.edit()) {
+                    putBoolean(p0.getString(R.string.dnd), false)
+                    putLong(p0.getString(R.string.dnd_enable_time), 0)
+                    apply()
+                }
+            }else{
+                with(sharedPref.edit()) {
+                    putBoolean(p0.getString(R.string.dnd), true)
+                    putLong(p0.getString(R.string.dnd_enable_time), System.currentTimeMillis())
+                    apply()
+                }
             }
 
-            with(sharedPref.edit()) {
-                putLong(p0.getString(R.string.dnd_enable_time), System.currentTimeMillis())
-                apply()
-            }
+
 
         }
 

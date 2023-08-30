@@ -38,5 +38,6 @@
     <string name="dnd_1hour">DND 1h</string>
     <string name="dnd">dnd\n</string>
     <string name="dnd_enable_time">dnd_enabled_time\n</string>
+    <string name="dnd_ing">dnding</string>
 
 </resources>
