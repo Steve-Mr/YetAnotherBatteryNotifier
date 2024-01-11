@@ -255,22 +255,31 @@ class ForegroundService : Service() {
 
     inner class BatteryLevelReceiver : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
+            //todo: add specific settings for enable dnd at night or not
+            // Check current time
+            val currentTime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) * 60 + Calendar.getInstance().get(Calendar.MINUTE)
+            val startTime = 23 * 60 + 30  // 11:30 PM in minutes
+            val endTime = 6 * 60 + 0      // 6:00 AM in minutes
+            val isNightTime = currentTime >= startTime || currentTime <= endTime
+
+            if (isNightTime) return
+
+            val sharedPref =
+                p0?.getSharedPreferences(
+                    p0.getString(R.string.name_shared_pref),
+                    Context.MODE_PRIVATE
+                ) ?: return
+
+            if (sharedPref.getBoolean(p0.getString(R.string.dnd), false)){
+                val dndSetTime = sharedPref.getLong(p0.getString(R.string.dnd_enable_time), 0)
+                if ((System.currentTimeMillis() - dndSetTime) < 1000*60*60){
+                    return
+                }
+            }
+
             val level: Int? = p1?.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
             if (level != null) {
                 if (level == 80 || level == 85) {
-
-                    val sharedPref =
-                        p0?.getSharedPreferences(
-                            p0.getString(R.string.name_shared_pref),
-                            Context.MODE_PRIVATE
-                        ) ?: return
-
-                    if (sharedPref.getBoolean(p0.getString(R.string.dnd), false)){
-                        val dndSetTime = sharedPref.getLong(p0.getString(R.string.dnd_enable_time), 0)
-                        if ((System.currentTimeMillis() - dndSetTime) < 1000*60*60){
-                            return
-                        }
-                    }
 
                     val notificationManager: NotificationManager =
                         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
