@@ -4,13 +4,9 @@
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
-<!--    <uses-feature-->
-<!--        android:name="android.software.leanback"-->
-<!--        android:required="true" />-->
-<!--    <uses-feature-->
-<!--        android:name="android.hardware.touchscreen"-->
-<!--        android:required="false" />-->
 
     <application
         android:allowBackup="true"
@@ -34,6 +30,7 @@
         </activity>
 
         <service android:name="com.maary.yetanotherbatterynotifier.ForegroundService"
+            android:foregroundServiceType="specialUse"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>

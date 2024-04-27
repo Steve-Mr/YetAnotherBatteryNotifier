@@ -5,10 +5,13 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.*
+import android.content.pm.ServiceInfo
 import android.os.BatteryManager
+import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import java.util.*
@@ -46,6 +49,7 @@ class ForegroundService : Service() {
         TODO("Not yet implemented")
     }
 
+    @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         Log.v("BUILD MODEL", android.os.Build.MODEL)
@@ -64,7 +68,7 @@ class ForegroundService : Service() {
         )
 
         Log.v("STATE", "foreground service")
-        startForeground(1, notification)// 2
+        startForeground(1, notification,  ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)// 2
 
         val batteryStatus: Intent? = registerReceiver(
             null,
