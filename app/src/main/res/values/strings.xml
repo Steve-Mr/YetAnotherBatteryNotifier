@@ -39,5 +39,6 @@
     <string name="dnd">dnd\n</string>
     <string name="dnd_enable_time">dnd_enabled_time\n</string>
     <string name="dnd_ing">dnding</string>
+    <string name="title_activity_settings">SettingsActivity</string>
 
 </resources>

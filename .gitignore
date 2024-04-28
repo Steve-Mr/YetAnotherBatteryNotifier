@@ -13,3 +13,8 @@
 .externalNativeBuild
 .cxx
 local.properties
+/app/build
+/app/release
+/.idea/appInsightsSettings.xml
+/app/src/androidTest
+/app/src/test

@@ -2,11 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
-
 
     <application
         android:allowBackup="true"
@@ -19,50 +18,61 @@
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
         tools:targetApi="31">
         <activity
-            android:name="com.maary.yetanotherbatterynotifier.MainActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:exported="true">
+            android:name=".SettingsActivity"
+            android:exported="true"
+            android:label="@string/title_activity_settings"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" >
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
 
-        <service android:name="com.maary.yetanotherbatterynotifier.ForegroundService"
-            android:foregroundServiceType="specialUse"
-            android:exported="false">
+        </activity>
+
+        <service
+            android:name=".ForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
             <intent-filter>
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED"/>
-                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED"/>
-                <action android:name="android.intent.action.SCREEN_ON"/>
-                <action android:name="android.intent.action.SCREEN_OFF"/>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.ACTION_POWER_DISCONNECTED" />
+                <action android:name="android.intent.action.SCREEN_ON" />
+                <action android:name="android.intent.action.SCREEN_OFF" />
             </intent-filter>
         </service>
-
-        <service android:name="com.maary.yetanotherbatterynotifier.QSTileService"
-            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE"
+        <service
+            android:name=".QSTileService"
+            android:exported="true"
             android:icon="@drawable/tile"
-            android:exported="true">
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
             <intent-filter>
-                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>
         </service>
 
-        <receiver android:name="com.maary.yetanotherbatterynotifier.BootCompleteReceiver"
+        <receiver
+            android:name=".BootCompleteReceiver"
             android:exported="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name=".SettingsReceiver"
+        <receiver
+            android:name=".SettingsReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver"/>
+                <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver" />
             </intent-filter>
         </receiver>
     </application>
