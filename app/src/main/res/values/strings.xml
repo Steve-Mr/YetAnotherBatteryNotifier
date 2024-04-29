@@ -36,9 +36,13 @@
     <string name="fucking_high">High!</string>
     <string name="fucking_low">Low!</string>
     <string name="dnd_1hour">DND 1h</string>
-    <string name="dnd">dnd\n</string>
-    <string name="dnd_enable_time">dnd_enabled_time\n</string>
+    <string name="dnd">dnd</string>
+    <string name="dnd_enable_time">dnd_enabled_time</string>
     <string name="dnd_ing">dnding</string>
     <string name="title_activity_settings">SettingsActivity</string>
+    <string name="fuck_oem_hidden">FUCK OEMs</string>
+    <string name="fuck_oem_regular">Inaccurate current readings</string>
+    <string name="fuck_oem_hidden_description">They can\'t even adapt the API well.</string>
+    <string name="fuck_oem_regular_description">On different OEM devices, the units used by the API for obtaining current magnitude may vary, resulting in values that are too large or too small.</string>
 
 </resources>

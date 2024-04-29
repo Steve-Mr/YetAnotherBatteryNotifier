@@ -4,16 +4,65 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Date
+import javax.inject.Inject
 
-class SettingsViewModel: ViewModel() {
+@HiltViewModel
+class SettingsViewModel @Inject constructor(private val preferenceRepository: PreferenceRepository): ViewModel() {
 
     companion object {
         val FREQUENCY_OPTIONS = mutableListOf("1s", "2s", "5s", "1min")
+        val FREQUENCY_LONG = mutableListOf(1000L, 2000L, 5000L, 60000L)
+    }
+
+    init {
+            preferenceRepository.getLevel1().onEach {
+                _notifyLevel1State.value = it.toFloat()
+            }.launchIn(viewModelScope)
+            preferenceRepository.getLevel2().onEach{
+                Log.v("SEVM", it.toString())
+                _notifyLevel2State.value = it.toFloat()
+            }.launchIn(viewModelScope)
+            preferenceRepository.getAlwaysShow().onEach {
+                _alwaysOnSwitchState.value = it
+            }.launchIn(viewModelScope)
+            preferenceRepository.getFrequency().onEach {
+                val index = FREQUENCY_LONG.indexOf(it)
+                Log.v("SEVM", "FRE $index")
+
+                _frequencyIndexState.value =
+                    if (index != -1) index
+                    else FREQUENCY_LONG.indexOf(5000L)
+            }.launchIn(viewModelScope)
+            preferenceRepository.getDndSet().onEach {
+                _dndSwitchState.value = it
+            }.launchIn(viewModelScope)
+            preferenceRepository.getDndStartTime().onEach {
+                _dndStartState.value= it ?: _dndStartState.value
+            }.launchIn(viewModelScope)
+            preferenceRepository.getDndEndTime().onEach {
+                _dndEndState.value= it ?: _dndEndState.value
+            }.launchIn(viewModelScope)
+            preferenceRepository.getFuckOEM().onEach {
+                _fuckOEMEnabled.value = it
+                if (it) {
+                    _oemTitle.value = R.string.fuck_oem_hidden
+                    _oemDescription.value = R.string.fuck_oem_hidden_description
+                } else {
+                    _oemTitle.value = R.string.fuck_oem_regular
+                    _oemDescription.value = R.string.fuck_oem_regular_description
+                }
+            }.launchIn(viewModelScope)
     }
 
     /**
@@ -27,13 +76,45 @@ class SettingsViewModel: ViewModel() {
     }
 
     /**
+     * 电量提醒档位 1
+     * */
+    private val _notifyLevel1State = MutableStateFlow(0f)
+    val notifyLevel1State = _notifyLevel1State.asStateFlow()
+
+    fun onLevel1Changed(level: Float) {
+        viewModelScope.launch {
+            preferenceRepository.setLevel1(level.toInt())
+        }
+    }
+
+    fun onLevel1Finished() {
+        Log.v("SEVM", "LEVEL 1 FINISHED")
+    }
+
+    /**
+     * 电量提醒档位 2
+     * */
+    private val _notifyLevel2State = MutableStateFlow(0f)
+    val notifyLevel2State = _notifyLevel2State.asStateFlow()
+
+    fun onLevel2Changed(level: Float) {
+        viewModelScope.launch {
+            preferenceRepository.setLevel2(level.toInt())
+        }
+    }
+
+    fun onLevel2Finished() {
+        Log.v("SEVM", "LEVEL 1 FINISHED")
+    }
+
+    /**
      * 是否启用常态显示
      * */
     private val _alwaysOnSwitchState = MutableStateFlow(false)
     val alwaysOnSwitchState: StateFlow<Boolean> = _alwaysOnSwitchState.asStateFlow()
 
     fun alwaysOnSwitchOnChecked(state: Boolean) {
-        _alwaysOnSwitchState.value = !_alwaysOnSwitchState.value
+        viewModelScope.launch { preferenceRepository.setAlwaysShow(state) }
     }
 
 
@@ -44,8 +125,9 @@ class SettingsViewModel: ViewModel() {
     val frequencyIndexState = _frequencyIndexState.asStateFlow()
 
     fun frequencyItemClicked(index: Int) {
-        _frequencyIndexState.value = index
-        Log.v("SEVM", "$index")
+        viewModelScope.launch {
+            preferenceRepository.setFrequency(FREQUENCY_LONG[index])
+        }
     }
 
     /**
@@ -55,7 +137,9 @@ class SettingsViewModel: ViewModel() {
     val dndSwitchState: StateFlow<Boolean> = _dndSwitchState.asStateFlow()
 
     fun dndSwitchOnChecked(state: Boolean) {
-        _dndSwitchState.value = !_dndSwitchState.value
+        viewModelScope.launch {
+            preferenceRepository.setDndSet(state)
+        }
     }
 
     /**
@@ -72,7 +156,9 @@ class SettingsViewModel: ViewModel() {
     val dndStartState = _dndStartState.asStateFlow()
 
     fun setDNDStart(start: Date) {
-        _dndStartState.value = start
+        viewModelScope.launch {
+            preferenceRepository.setDndStartTime(start)
+        }
     }
 
     /**
@@ -89,15 +175,59 @@ class SettingsViewModel: ViewModel() {
     val dndEndState = _dndEndState.asStateFlow()
 
     fun setDNDEnd(end: Date) {
-        _dndEndState.value = end
+        viewModelScope.launch {
+            preferenceRepository.setDndEndTime(end)
+        }
     }
 
     /**
      * 值太小
      * */
+    private val _fuckOEMEnabled = MutableStateFlow(false)
+    val fuckOEMEnabled = _fuckOEMEnabled.asStateFlow()
+
+    private val _oemTitle = MutableStateFlow(R.string.fuck_oem_regular)
+    private val _oemDescription = MutableStateFlow(R.string.fuck_oem_regular_description)
+    val oemTitle = _oemTitle.asStateFlow()
+    val oemDescription = _oemDescription.asStateFlow()
+
+    fun getOEMLabel(): Int {
+        return if (_fuckOEMEnabled.value) {
+            R.string.fuck_oem_hidden
+        } else {
+            R.string.fuck_oem_regular
+        }
+    }
+
+    fun getOEMDescription(): Int {
+        return if (_fuckOEMEnabled.value) {
+            R.string.fuck_oem_hidden_description
+        } else {
+            R.string.fuck_oem_regular_description
+        }
+    }
+
+    fun enableOEMLabel() {
+        viewModelScope.launch {
+            preferenceRepository.setFuckOEM(true)
+            _oemTitle.value = R.string.fuck_oem_hidden
+            _oemDescription.value = R.string.fuck_oem_hidden_description
+        }
+    }
+
+    fun restoreOEMLabel() {
+        viewModelScope.launch {
+            preferenceRepository.setFuckOEM(false)
+            _oemTitle.value = R.string.fuck_oem_regular
+            _oemDescription.value = R.string.fuck_oem_regular_description
+        }
+    }
 
     fun onUpscaleClicked() {
         Log.v("SEVM", "UP")
+        viewModelScope.launch {
+            preferenceRepository.setRatio(1000)
+        }
     }
 
     /**
@@ -105,5 +235,8 @@ class SettingsViewModel: ViewModel() {
      * */
     fun onDownscaleClicked() {
         Log.v("SEVM", "DOWN")
+        viewModelScope.launch {
+            preferenceRepository.setRatio(1)
+        }
     }
 }

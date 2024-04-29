@@ -1,11 +1,15 @@
 package com.maary.yetanotherbatterynotifier
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.StringRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,11 +17,14 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -35,6 +42,7 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -46,12 +54,16 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,13 +73,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.maary.yetanotherbatterynotifier.ui.theme.Typography
 import com.maary.yetanotherbatterynotifier.ui.theme.YetAnotherBatteryNotifierTheme
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.math.roundToInt
 
 
+@AndroidEntryPoint
 class SettingsActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +100,6 @@ class SettingsActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     SettingsScreen()
-
                 }
             }
         }
@@ -97,7 +116,21 @@ fun TextContent(modifier: Modifier = Modifier, title: String, description: Strin
         Text(
             description,
             style = Typography.bodySmall,
-            maxLines = 2
+            maxLines = 5
+        )
+    }
+}
+
+@Composable
+fun SliderItem(sliderPosition: Float, onValueChange: (Float) -> Unit, onValueChangeFinished: () -> Unit) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(text = sliderPosition.roundToInt().toString())
+        Slider(
+            modifier = Modifier.semantics { contentDescription = "Localized Description" },
+            value = sliderPosition,
+            onValueChange = { onValueChange(it) },
+            valueRange = 60f..100f,
+            onValueChangeFinished = { onValueChangeFinished() },
         )
     }
 }
@@ -109,42 +142,33 @@ fun DropdownItem(modifier: Modifier, options: MutableList<String>, position: Int
         mutableStateOf(false)
     }
 
-    var text by remember { mutableStateOf(options[position]) }
-
     Box(modifier = modifier) {
         ExposedDropdownMenuBox(
             modifier =
-            Modifier
-                .padding(8.dp),
+            Modifier.padding(8.dp),
             expanded = expanded,
             onExpandedChange = { expanded = it },
         ) {
             OutlinedTextField(
-                // The `menuAnchor` modifier must be passed to the text field to handle
-                // expanding/collapsing the menu on click. A read-only text field has
-                // the anchor type `PrimaryNotEditable`.
                 modifier = Modifier
-                    .width(IntrinsicSize.Min)
+                    .wrapContentWidth()
                     .menuAnchor(MenuAnchorType.PrimaryNotEditable),
-                value = text,
+                value = options[position],//text,
                 onValueChange = {},
                 readOnly = true,
                 singleLine = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             )
             ExposedDropdownMenu(
-                modifier = Modifier
-                    .width(IntrinsicSize.Min),
+                modifier = Modifier.wrapContentWidth(),
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
             ) {
                 options.forEach { option ->
                     DropdownMenuItem(
-                        modifier = Modifier
-                            .width(IntrinsicSize.Min),
+                        modifier = Modifier.wrapContentWidth(),
                         text = { Text(option, style = Typography.bodyLarge) },
                         onClick = {
-                            text = option
                             expanded = false
                             onItemClicked(options.indexOf(option))
                         },
@@ -168,7 +192,8 @@ fun TimePickerItem(title: String, time: Date, onConfirm: (Date) -> Unit) {
     Row (modifier = Modifier
         .fillMaxWidth()
         .clickable(enabled = true, onClick = { showTimePicker = true })
-        .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp)){
+        .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
+        verticalAlignment = Alignment.CenterVertically){
         Text(title)
         Text(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
             text = formatter.format(time))
@@ -268,6 +293,32 @@ fun SwitchRow(
 }
 
 @Composable
+fun AlertPercentRow(title: String, description: String,
+                    level1: Float, level2: Float,
+                    onLevel1Change: (Float) -> Unit, onLevel1Finished: () -> Unit,
+                    onLevel2Change: (Float) -> Unit, onLevel2Finished: () -> Unit) {
+    Column (
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.Start
+    ){
+        TextContent(title = title, description = description)
+        Row (modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically){
+            Text("档位1")
+            SliderItem(sliderPosition = level1, onValueChange = onLevel1Change, onValueChangeFinished = onLevel1Finished)
+        }
+        Row (modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Text("档位2")
+            SliderItem(sliderPosition = level2, onValueChange = onLevel2Change, onValueChangeFinished = onLevel2Finished)
+        }
+    }
+}
+
+@Composable
 fun DropdownRow(title: String, description: String, options: MutableList<String>, position: Int, onItemClicked: (Int) -> Unit) {
     Row(
         modifier =
@@ -277,8 +328,8 @@ fun DropdownRow(title: String, description: String, options: MutableList<String>
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TextContent(modifier = Modifier.weight(2f), title = title, description = description)
-        DropdownItem(modifier = Modifier.weight(1f), options = options,
+        TextContent(modifier = Modifier.weight(3f), title = title, description = description)
+        DropdownItem(modifier = Modifier.weight(2f), options = options,
             position = position, onItemClicked = onItemClicked)
     }
 }
@@ -320,11 +371,10 @@ fun FuckOEMRow(title: String, description: String,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.Top
     ) {
-        TextContent(title = title, description = description)
+        TextContent(modifier = Modifier.weight(1f), title = title, description = description)
         Column(
             modifier =
-            Modifier
-                .wrapContentWidth(),
+            Modifier.wrapContentWidth(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -355,7 +405,7 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(top = innerPadding.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
         ) {
             SwitchRow(
@@ -363,7 +413,16 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
                 description = "显示状态",
                 state = settingsViewModel.foregroundSwitchState.collectAsState().value,
                 onCheckedChange = { settingsViewModel.foregroundSwitchOnChecked(it) })
-
+            AlertPercentRow(
+                title = "提醒档位1",
+                description = "充电至该水平将发出通知",
+                level1 = settingsViewModel.notifyLevel1State.collectAsState().value,
+                onLevel1Change = { settingsViewModel.onLevel1Changed(it) },
+                onLevel1Finished = { settingsViewModel.onLevel1Finished() },
+                level2 = settingsViewModel.notifyLevel2State.collectAsState().value,
+                onLevel2Change = { settingsViewModel.onLevel2Changed(it) },
+                onLevel2Finished = { settingsViewModel.onLevel2Finished() },
+            )
             SwitchRow(
                 title = "常态显示",
                 description = "未充电时也显示状态",
@@ -385,16 +444,57 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
                 onStartSet = { settingsViewModel.setDNDStart(it)},
                 onEndSet = { settingsViewModel.setDNDEnd(it)})
             FuckOEMRow(
-                title = "干他妈的 OEM",
-                description = "适配个 API 都能适配歪来",
+                title = stringResource(id = settingsViewModel.oemTitle.collectAsState().value),
+                description = stringResource(id = settingsViewModel.oemDescription.collectAsState().value),
                 onUpscaleClicked = { settingsViewModel.onUpscaleClicked() },
                 onDownScaleClicked = { settingsViewModel.onDownscaleClicked() })
+            AboutRow(
+                enableOEM = { settingsViewModel.enableOEMLabel() },
+                disableOEM = { settingsViewModel.restoreOEMLabel() }
+            )
+            Spacer(
+                Modifier.windowInsetsBottomHeight(
+                    WindowInsets.systemBars
+                )
+            )
         }
     }
-
-
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun AboutRow(enableOEM: () -> Unit, disableOEM: () -> Unit) {
+    var clickCount by remember {
+        mutableIntStateOf(0)
+    }
+    var job by remember {
+        mutableStateOf<Job?>(null)
+    }
+    Row (modifier = Modifier
+        .fillMaxWidth()
+        .combinedClickable(
+            onClick = {
+                clickCount++
+                if (clickCount == 1) {
+                    job = CoroutineScope(Dispatchers.Default).launch {
+                        delay(5000) // 500 milliseconds
+                        withContext(Dispatchers.Main) {
+                            clickCount = 0
+                            Log.v("SEVM", "test")
+                        }
+                    }
+                } else if (clickCount == 5) {
+                    job?.cancel()
+                    clickCount = 0
+                    Log.v("SEVM", "true dude")
+                    enableOEM()
+                }
+            },
+            onLongClick = { disableOEM() })
+        .padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 16.dp)){
+        TextContent(title = stringResource(id = R.string.app_name), description = BuildConfig.VERSION_NAME)
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
