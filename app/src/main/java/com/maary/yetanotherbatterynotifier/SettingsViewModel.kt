@@ -1,11 +1,22 @@
 package com.maary.yetanotherbatterynotifier
 
+import android.Manifest
+import android.app.ActivityManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
 import android.util.Log
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalView
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,52 +28,16 @@ import java.util.Calendar
 import java.util.Date
 import javax.inject.Inject
 
+
 @HiltViewModel
-class SettingsViewModel @Inject constructor(private val preferenceRepository: PreferenceRepository): ViewModel() {
+class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val application: Context,
+    private val preferenceRepository: PreferenceRepository
+): ViewModel() {
 
     companion object {
         val FREQUENCY_OPTIONS = mutableListOf("1s", "2s", "5s", "1min")
         val FREQUENCY_LONG = mutableListOf(1000L, 2000L, 5000L, 60000L)
-    }
-
-    init {
-            preferenceRepository.getLevel1().onEach {
-                _notifyLevel1State.value = it.toFloat()
-            }.launchIn(viewModelScope)
-            preferenceRepository.getLevel2().onEach{
-                Log.v("SEVM", it.toString())
-                _notifyLevel2State.value = it.toFloat()
-            }.launchIn(viewModelScope)
-            preferenceRepository.getAlwaysShow().onEach {
-                _alwaysOnSwitchState.value = it
-            }.launchIn(viewModelScope)
-            preferenceRepository.getFrequency().onEach {
-                val index = FREQUENCY_LONG.indexOf(it)
-                Log.v("SEVM", "FRE $index")
-
-                _frequencyIndexState.value =
-                    if (index != -1) index
-                    else FREQUENCY_LONG.indexOf(5000L)
-            }.launchIn(viewModelScope)
-            preferenceRepository.getDndSet().onEach {
-                _dndSwitchState.value = it
-            }.launchIn(viewModelScope)
-            preferenceRepository.getDndStartTime().onEach {
-                _dndStartState.value= it ?: _dndStartState.value
-            }.launchIn(viewModelScope)
-            preferenceRepository.getDndEndTime().onEach {
-                _dndEndState.value= it ?: _dndEndState.value
-            }.launchIn(viewModelScope)
-            preferenceRepository.getFuckOEM().onEach {
-                _fuckOEMEnabled.value = it
-                if (it) {
-                    _oemTitle.value = R.string.fuck_oem_hidden
-                    _oemDescription.value = R.string.fuck_oem_hidden_description
-                } else {
-                    _oemTitle.value = R.string.fuck_oem_regular
-                    _oemDescription.value = R.string.fuck_oem_regular_description
-                }
-            }.launchIn(viewModelScope)
     }
 
     /**
@@ -71,8 +46,43 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
     private val _foregroundSwitchState = MutableStateFlow(false)
     val foregroundSwitchState: StateFlow<Boolean> = _foregroundSwitchState.asStateFlow()
 
+    private fun restartForegroundService() {
+        viewModelScope.launch {
+            val intent = Intent(application, ForegroundService::class.java)
+            application.stopService(intent)
+            delay(1500)
+            application.startForegroundService(intent)
+        }
+
+    }
     fun foregroundSwitchOnChecked(state: Boolean) {
-        _foregroundSwitchState.value = !_foregroundSwitchState.value
+        val intent = Intent(application, ForegroundService::class.java)
+        if (!_foregroundSwitchState.value){
+
+            createNotificationChannel(
+                NotificationManager.IMPORTANCE_MIN,
+                application.getString(R.string.default_channel),
+                application.getString(R.string.default_channel_description)
+            )
+            createNotificationChannel(
+                NotificationManager.IMPORTANCE_DEFAULT,
+                application.getString(R.string.channel_notify),
+                application.getString(R.string.channel_notify_description)
+            )
+            createNotificationChannel(
+                NotificationManager.IMPORTANCE_LOW,
+                application.getString(R.string.channel_settings),
+                application.getString(R.string.channel_settings_description)
+            )
+
+            Log.v("SEVM", "START FORE")
+            application.startForegroundService(intent)
+        }else {
+            Log.v("SEVM", "END FORE")
+
+            application.stopService(intent)
+        }
+//        _foregroundSwitchState.value = ForegroundService.isForegroundServiceRunning()
     }
 
     /**
@@ -88,7 +98,7 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
     }
 
     fun onLevel1Finished() {
-        Log.v("SEVM", "LEVEL 1 FINISHED")
+        restartForegroundService()
     }
 
     /**
@@ -104,7 +114,7 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
     }
 
     fun onLevel2Finished() {
-        Log.v("SEVM", "LEVEL 1 FINISHED")
+        restartForegroundService()
     }
 
     /**
@@ -115,6 +125,7 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
 
     fun alwaysOnSwitchOnChecked(state: Boolean) {
         viewModelScope.launch { preferenceRepository.setAlwaysShow(state) }
+        restartForegroundService()
     }
 
 
@@ -128,6 +139,7 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
         viewModelScope.launch {
             preferenceRepository.setFrequency(FREQUENCY_LONG[index])
         }
+        restartForegroundService()
     }
 
     /**
@@ -140,6 +152,7 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
         viewModelScope.launch {
             preferenceRepository.setDndSet(state)
         }
+        restartForegroundService()
     }
 
     /**
@@ -158,6 +171,9 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
     fun setDNDStart(start: Date) {
         viewModelScope.launch {
             preferenceRepository.setDndStartTime(start)
+        }
+        if (_dndSwitchState.value) {
+            restartForegroundService()
         }
     }
 
@@ -178,11 +194,11 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
         viewModelScope.launch {
             preferenceRepository.setDndEndTime(end)
         }
+        if (_dndSwitchState.value) {
+            restartForegroundService()
+        }
     }
 
-    /**
-     * 值太小
-     * */
     private val _fuckOEMEnabled = MutableStateFlow(false)
     val fuckOEMEnabled = _fuckOEMEnabled.asStateFlow()
 
@@ -223,11 +239,15 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
         }
     }
 
+    /**
+     * 值太小
+     * */
     fun onUpscaleClicked() {
         Log.v("SEVM", "UP")
         viewModelScope.launch {
-            preferenceRepository.setRatio(1000)
+            preferenceRepository.setRatio(1)
         }
+        restartForegroundService()
     }
 
     /**
@@ -236,7 +256,63 @@ class SettingsViewModel @Inject constructor(private val preferenceRepository: Pr
     fun onDownscaleClicked() {
         Log.v("SEVM", "DOWN")
         viewModelScope.launch {
-            preferenceRepository.setRatio(1)
+            preferenceRepository.setRatio(1000)
         }
+        restartForegroundService()
+    }
+
+    init {
+        preferenceRepository.getLevel1().onEach {
+            _notifyLevel1State.value = it.toFloat()
+        }.launchIn(viewModelScope)
+        preferenceRepository.getLevel2().onEach{
+            Log.v("SEVM", it.toString())
+            _notifyLevel2State.value = it.toFloat()
+        }.launchIn(viewModelScope)
+        preferenceRepository.getAlwaysShow().onEach {
+            _alwaysOnSwitchState.value = it
+        }.launchIn(viewModelScope)
+        preferenceRepository.getFrequency().onEach {
+            val index = FREQUENCY_LONG.indexOf(it)
+            Log.v("SEVM", "FRE $index")
+
+            _frequencyIndexState.value =
+                if (index != -1) index
+                else FREQUENCY_LONG.indexOf(5000L)
+        }.launchIn(viewModelScope)
+        preferenceRepository.getDndSet().onEach {
+            _dndSwitchState.value = it
+        }.launchIn(viewModelScope)
+        preferenceRepository.getDndStartTime().onEach {
+            _dndStartState.value= it ?: _dndStartState.value
+        }.launchIn(viewModelScope)
+        preferenceRepository.getDndEndTime().onEach {
+            _dndEndState.value= it ?: _dndEndState.value
+        }.launchIn(viewModelScope)
+        preferenceRepository.getFuckOEM().onEach {
+            _fuckOEMEnabled.value = it
+            if (it) {
+                _oemTitle.value = R.string.fuck_oem_hidden
+                _oemDescription.value = R.string.fuck_oem_hidden_description
+            } else {
+                _oemTitle.value = R.string.fuck_oem_regular
+                _oemDescription.value = R.string.fuck_oem_regular_description
+            }
+        }.launchIn(viewModelScope)
+        ForegroundService.isForegroundServiceRunning.onEach {
+            _foregroundSwitchState.value = it
+        }.launchIn(viewModelScope)
+    }
+
+    private fun createNotificationChannel(importance:Int, name:String, descriptionText: String) {
+        //val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val channel = NotificationChannel(name, name, importance).apply {
+            description = descriptionText
+        }
+        // Register the channel with the system
+        val notificationManager: NotificationManager =
+            application.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (notificationManager.getNotificationChannel(name)!=null) return
+        notificationManager.createNotificationChannel(channel)
     }
 }

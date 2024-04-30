@@ -36,7 +36,7 @@ class QSTileService: TileService() {
 
         val intent = Intent(this, ForegroundService::class.java)
 
-        if (!ForegroundService.isForegroundServiceRunning()){
+        if (!ForegroundService.getIsForegroundServiceRunning()){
             createNotificationChannel(
                 NotificationManager.IMPORTANCE_MIN,
                 resources.getString(R.string.default_channel),
@@ -70,7 +70,7 @@ class QSTileService: TileService() {
         super.onStartListening()
         val tile = qsTile
 
-        if (!ForegroundService.isForegroundServiceRunning()){
+        if (!ForegroundService.getIsForegroundServiceRunning()){
             tile.state = Tile.STATE_INACTIVE
             tile.label = getString(R.string.qstile_inactive)
 

@@ -3,58 +3,62 @@ package com.maary.yetanotherbatterynotifier
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.Service
-import android.content.*
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.os.BatteryManager
 import android.os.Build
-import android.os.IBinder
 import android.os.PowerManager
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
-import java.util.*
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import java.util.Calendar
+import java.util.Date
+import java.util.Timer
+import java.util.TimerTask
+import javax.inject.Inject
 
-class ForegroundService : Service() {
+@AndroidEntryPoint
+class ForegroundService : LifecycleService() {
 
-    private var timer = Timer()
-    private var isTimerRunning = false
+    private var timer: Timer? = null
     private var isScreenOnReceiver = false
     private var isLevelReceiver = false
 
-//    private val sharedPreferences: SharedPreferences = getSharedPreferences(getString(R.string.name_shared_pref), Context.MODE_PRIVATE)
-
-    private val numDiv = if(android.os.Build.MANUFACTURER.equals("realme", true) ||
-            android.os.Build.MANUFACTURER.equals("oppo", true)) 1 else 1000
-
-
+    @Inject
+    lateinit var preferences: PreferenceRepository
 
     val screenReceiver = ScreenReceiver()
     private val chargingReceiver = ChargingReceiver()
     val levelReceiver = BatteryLevelReceiver()
 
-    lateinit var sharedPref : SharedPreferences
-
     companion object {
-        private var isForegroundServiceRunning = false
+        private val _isForegroundServiceRunning = MutableStateFlow(false)
+        val isForegroundServiceRunning: StateFlow<Boolean>
+            get() = _isForegroundServiceRunning
 
         @JvmStatic
-        fun isForegroundServiceRunning(): Boolean {
-            return isForegroundServiceRunning
+        fun getIsForegroundServiceRunning(): Boolean {
+            return _isForegroundServiceRunning.value
         }
-    }
-
-    override fun onBind(p0: Intent?): IBinder? {
-        TODO("Not yet implemented")
     }
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-
-        Log.v("BUILD MODEL", android.os.Build.MODEL)
-        Log.v("MANUFACTURER", android.os.Build.MANUFACTURER)
-        Log.v("BRAND", android.os.Build.BRAND)
+        super.onStartCommand(intent, flags, startId)
 
         val notification = updateNotificationInfo(
             resources.getString(R.string.default_channel),
@@ -68,7 +72,7 @@ class ForegroundService : Service() {
         )
 
         Log.v("STATE", "foreground service")
-        startForeground(1, notification,  ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)// 2
+        startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)// 2
 
         val batteryStatus: Intent? = registerReceiver(
             null,
@@ -81,41 +85,40 @@ class ForegroundService : Service() {
 
         val isInteractive = getSystemService<PowerManager>()?.isInteractive
 
-        Log.v("STATE", isCharging.toString())
-        Log.v("STATUS", status.toString() + " " + BatteryManager.BATTERY_STATUS_CHARGING.toString())
         if (isCharging && isInteractive == true) {
             startTimerTask()
         }
 
-        isForegroundServiceRunning = true
+        _isForegroundServiceRunning.value = true
 
         return START_STICKY
     }
 
     override fun onCreate() {
         super.onCreate()
-        var filter = IntentFilter()
-        sharedPref = getSharedPreferences(getString(R.string.name_shared_pref), Context.MODE_PRIVATE)
-        if (sharedPref.getBoolean(getString(R.string.boolean_always_show_speed), false)){
-            if (!isScreenOnReceiver) {
-                filter.addAction(Intent.ACTION_SCREEN_ON)
-                filter.addAction(Intent.ACTION_SCREEN_OFF)
-                registerReceiver(screenReceiver, filter)
-                isScreenOnReceiver = true
-                filter = IntentFilter()
+        lifecycleScope.launch {
+            var filter = IntentFilter()
+            if (preferences.getAlwaysShow().first()) {
+                if (!isScreenOnReceiver) {
+                    filter.addAction(Intent.ACTION_SCREEN_ON)
+                    filter.addAction(Intent.ACTION_SCREEN_OFF)
+                    registerReceiver(screenReceiver, filter)
+                    isScreenOnReceiver = true
+                    filter = IntentFilter()
+                }
+                if (getSystemService<PowerManager>()?.isInteractive == true) {
+                    startTimerTask()
+                }
             }
-            if (getSystemService<PowerManager>()?.isInteractive == true){
-                startTimerTask()
-            }
+            filter.addAction(Intent.ACTION_POWER_CONNECTED)
+            filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
+            registerReceiver(chargingReceiver, filter)
         }
-        filter.addAction(Intent.ACTION_POWER_CONNECTED)
-        filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
-        registerReceiver(chargingReceiver, filter)
     }
 
     override fun onDestroy() {
         Log.v("SERVICE", "onDestroy()")
-        isForegroundServiceRunning = false
+        _isForegroundServiceRunning.value = false
         unregisterReceiver(chargingReceiver)
         stopTimerTask()
         if (isLevelReceiver) unregisterReceiver(levelReceiver)
@@ -128,24 +131,32 @@ class ForegroundService : Service() {
     }
 
     private fun startTimerTask() {
-        if (!isTimerRunning) {
-            isTimerRunning = true
+
+        var ratio = 1000
+        var frequency = 5000L
+        preferences.getRatio().onEach {
+            ratio = it
+        }.launchIn(lifecycleScope)
+        preferences.getFrequency().onEach {
+            frequency = it
+        }.launchIn(lifecycleScope)
+        if (timer == null) {
             timer = Timer()
             val batteryManager: BatteryManager =
-                this.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+                getSystemService(Context.BATTERY_SERVICE) as BatteryManager
             val notificationManager: NotificationManager =
-                this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-            timer.schedule(object : TimerTask() {
+            timer?.schedule(object : TimerTask() {
                 override fun run() {
-                    val batteryStatus: Intent? = registerReceiver(null,
+                    val batteryStatus: Intent? = registerReceiver(
+                        null,
                         IntentFilter(Intent.ACTION_BATTERY_CHANGED)
                     )
-                    val ratio = if (sharedPref.contains(getString(R.string.shared_pref_ratio))) sharedPref.getInt(getString(R.string.shared_pref_ratio), 1000)
-                    else numDiv
 
                     val currentNow: Long =
-                        -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW).div(ratio)
+                        -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+                            .div(ratio)
                     notificationManager.notify(
                         1,
                         updateNotificationInfo(
@@ -153,9 +164,10 @@ class ForegroundService : Service() {
                             isOnGoing = true,
                             isAlertOnce = true,
                             title = "",//resources.getString(R.string.yet_another_battery_notifier),
-                            content = getString(R.string.string_monitoring, currentNow.toString(),
+                            content = getString(
+                                R.string.string_monitoring, currentNow.toString(),
                                 (batteryStatus?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)
-                                        ?.div(10) ?: 0).toString()
+                                    ?.div(10) ?: 0).toString()
                             ),
                             icon = R.drawable.notification_charging,
                             withAction = true,
@@ -164,15 +176,17 @@ class ForegroundService : Service() {
                     )
                     Log.v("RUNNING", "timer task")
                 }
-            }, 0, sharedPref.getLong(getString(R.string.shared_pref_frequency), 5000L))
+            }, 0, frequency)
         }
+
+
     }
 
     private fun stopTimerTask() {
-        if (isTimerRunning) {
-            timer.cancel()
-            timer.purge()
-            isTimerRunning = false
+        if (timer != null) {
+            timer!!.cancel()
+            timer!!.purge()
+            timer = null
         }
 
         val notification = updateNotificationInfo(
@@ -201,9 +215,7 @@ class ForegroundService : Service() {
             }
             if ("android.intent.action.SCREEN_ON" == p1.action) {
                 startTimerTask()
-                Log.v("==SCREENON ALT==", "Screen on")
             } else if ("android.intent.action.SCREEN_OFF" == p1.action) {
-                Log.v("==SCREENOFF ALT==", "Screen off")
                 stopTimerTask()
             }
         }
@@ -245,45 +257,63 @@ class ForegroundService : Service() {
                     unregisterReceiver(levelReceiver)
                     isLevelReceiver = false
                 }
-                if (!sharedPref.getBoolean(getString(R.string.boolean_always_show_speed), false)){
-                    stopTimerTask()
-                    if (isScreenOnReceiver) {
-                        unregisterReceiver(screenReceiver)
-                        isScreenOnReceiver = false
+                preferences.getAlwaysShow().onEach {
+                    if (!it) {
+                        stopTimerTask()
+                        if (isScreenOnReceiver) {
+                            unregisterReceiver(screenReceiver)
+                            isScreenOnReceiver = false
+                        }
                     }
-                }
-
+                }.launchIn(lifecycleScope)
             }
         }
     }
 
     inner class BatteryLevelReceiver : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            //todo: add specific settings for enable dnd at night or not
-            // Check current time
-            val currentTime = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) * 60 + Calendar.getInstance().get(Calendar.MINUTE)
-            val startTime = 23 * 60 + 30  // 11:30 PM in minutes
-            val endTime = 6 * 60 + 0      // 6:00 AM in minutes
-            val isNightTime = currentTime >= startTime || currentTime <= endTime
-
-            if (isNightTime) return
-
-            val sharedPref =
-                p0?.getSharedPreferences(
-                    p0.getString(R.string.name_shared_pref),
-                    Context.MODE_PRIVATE
-                ) ?: return
-
-            if (sharedPref.getBoolean(p0.getString(R.string.dnd), false)){
-                val dndSetTime = sharedPref.getLong(p0.getString(R.string.dnd_enable_time), 0)
-                if ((System.currentTimeMillis() - dndSetTime) < 1000*60*60){
-                    return
-                }
-            }
+            val currentTime =
+                Calendar.getInstance().get(Calendar.HOUR_OF_DAY) * 60 + Calendar.getInstance()
+                    .get(Calendar.MINUTE)
+            var startTime = 23 * 60 + 30  // 11:30 PM in minutes
+            var endTime = 6 * 60 + 0      // 6:00 AM in minutes
 
             val level: Int? = p1?.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
+            var level1 = 80
+            var level2 = 85
+
+            var tempDnd = false
+            var tempDndStartTime = 0L
+
+            preferences.getLevel1().onEach {
+                level1 = it
+            }.launchIn(lifecycleScope)
+            preferences.getLevel2().onEach {
+                level2 = it
+            }.launchIn(lifecycleScope)
+            preferences.getDndStartTime().onEach {
+                startTime = calculateMinutesFromDate(it!!)
+            }.launchIn(lifecycleScope)
+            preferences.getDndEndTime().onEach {
+                endTime = calculateMinutesFromDate(it!!)
+            }.launchIn(lifecycleScope)
+            preferences.getTempDnd().onEach {
+                tempDnd = it
+            }.launchIn(lifecycleScope)
+            preferences.getTempDndEnabledTime().onEach {
+                tempDndStartTime = it
+            }.launchIn(lifecycleScope)
+
+
+            val isNightTime = currentTime >= startTime || currentTime <= endTime
+
+            if (isNightTime || (tempDnd && (System.currentTimeMillis()
+                    .minus(tempDndStartTime)) < 1000 * 60 * 60)
+            ) return
+
+
             if (level != null) {
-                if (level == 80 || level == 85) {
+                if (level == level1 || level == level2) {
 
                     val notificationManager: NotificationManager =
                         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -302,6 +332,15 @@ class ForegroundService : Service() {
                     )
                 }
             }
+        }
+
+        private fun calculateMinutesFromDate(date: Date): Int {
+            val calendar = Calendar.getInstance().apply {
+                time = date
+            }
+            val hours = calendar.get(Calendar.HOUR_OF_DAY)
+            val minutes = calendar.get(Calendar.MINUTE)
+            return hours * 60 + minutes
         }
     }
 
@@ -326,30 +365,14 @@ class ForegroundService : Service() {
             .setContentText(content)
             .setPriority(priority)
 
-        if (withAction){
-            val settingsIntent = Intent(this, SettingsReceiver::class.java).apply {
-                action = "com.maary.yetanotherbatterynotifier.SettingsReceiver"
-            }
-            val snoozePendingIntent: PendingIntent =
-                PendingIntent.getBroadcast(this, 0, settingsIntent, PendingIntent.FLAG_IMMUTABLE)
+        if (withAction) {
+            val settingsIntent = Intent(this, SettingsActivity::class.java)
+            val settingsPendingIntent = PendingIntent.getActivity(this, 0, settingsIntent, PendingIntent.FLAG_IMMUTABLE)
 
-            val actionSettings : NotificationCompat.Action = NotificationCompat.Action.Builder(
+            val actionSettings: NotificationCompat.Action = NotificationCompat.Action.Builder(
                 R.drawable.ic_baseline_settings_24,
                 resources.getString(R.string.settings),
-                snoozePendingIntent
-            ).build()
-
-            val fuckOEMIntent = Intent(this, SettingsReceiver::class.java).apply {
-                action = "com.maary.yetanotherbatterynotifier.SettingsReceiver.fuckOEM"
-            }
-
-            val fuckOEMPendingIntent: PendingIntent =
-                PendingIntent.getBroadcast(this, 0, fuckOEMIntent, PendingIntent.FLAG_IMMUTABLE)
-
-            val actionFuckOEM : NotificationCompat.Action = NotificationCompat.Action.Builder(
-                R.drawable.ic_fuck_oem,
-                resources.getString(R.string.fuck_oem),
-                fuckOEMPendingIntent
+                settingsPendingIntent
             ).build()
 
             val sleepIntent = Intent(this, SettingsReceiver::class.java).apply {
@@ -361,28 +384,24 @@ class ForegroundService : Service() {
 
             var dndTitleResource = R.string.dnd_1hour
 
-            if (sharedPref.getBoolean(getString(R.string.dnd), false)){
-                val dndSetTime = sharedPref.getLong(getString(R.string.dnd_enable_time), 0)
-                if ((System.currentTimeMillis() - dndSetTime) < 1000*60*60){
-                    Log.v("==YABN==", dndSetTime.toString())
-                    Log.v("==YABN==", System.currentTimeMillis().toString())
-                    dndTitleResource = R.string.dnd_ing
-                }else{
-                    with(sharedPref.edit()){
-                        putBoolean(getString(R.string.dnd), false)
-                        apply()
+            runBlocking {
+                if (preferences.getTempDnd().first()) {
+                    val dndSetTime: Long = preferences.getTempDndEnabledTime().first()
+                    if ((System.currentTimeMillis() - dndSetTime) < 1000 * 60 * 60) {
+                        dndTitleResource = R.string.dnd_ing
+                    } else {
+                        preferences.setTempDnd(false)
                     }
                 }
             }
 
-            val actionSleep : NotificationCompat.Action = NotificationCompat.Action.Builder(
+            val actionSleep: NotificationCompat.Action = NotificationCompat.Action.Builder(
                 R.drawable.ic_dnd,
                 resources.getString(dndTitleResource),
                 sleepPendingIntent
             ).build()
 
             notificationBuilder.addAction(actionSettings)
-            notificationBuilder.addAction(actionFuckOEM)
             notificationBuilder.addAction(actionSleep)
         }
 
