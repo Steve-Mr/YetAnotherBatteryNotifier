@@ -29,4 +29,23 @@
     <string name="fuck_oem">值太…</string>
     <string name="fucking_high">高！</string>
     <string name="fucking_low">低！</string>
+    <string name="dnd_1hour">静音一小时</string>
+    <string name="dnd_ing">静音中</string>
+    <string name="fuck_oem_hidden">干他妈的 OEM</string>
+    <string name="fuck_oem_regular">电流读数不对</string>
+    <string name="fuck_oem_hidden_description">适配个 API 都能五花八门</string>
+    <string name="fuck_oem_regular_description">不同厂商生产的设备上，用于获得当前电流的 API 单位可能不统一，导致读数过大或过小</string>
+    <string name="notification_settings">通知设置</string>
+    <string name="notification_settings_description">设置通知的优先级</string>
+    <string name="enable_foreground_service">开启服务</string>
+    <string name="enable_foreground_service_description">开始监控电流和温度</string>
+    <string name="charge_notification">何时通知</string>
+    <string name="charge_notification_description">充电至下面的百分比将发出通知</string>
+    <string name="notification_level_1">限制1</string>
+    <string name="notification_level_2">限制2</string>
+    <string name="frequency_description">信息更新速度</string>
+    <string name="dnd_enable_title">DND 时间表</string>
+    <string name="dnd_enable_description">下面时间段内不会发送通知</string>
+    <string name="dnd_start_time">开始时间</string>
+    <string name="dnd_end_time">结束时间</string>
 </resources>
