@@ -1,26 +1,19 @@
 package com.maary.yetanotherbatterynotifier
 
-import android.Manifest
-import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
-import android.provider.Settings
 import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maary.yetanotherbatterynotifier.service.ForegroundService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -68,11 +61,6 @@ class SettingsViewModel @Inject constructor(
                 NotificationManager.IMPORTANCE_DEFAULT,
                 application.getString(R.string.channel_notify),
                 application.getString(R.string.channel_notify_description)
-            )
-            createNotificationChannel(
-                NotificationManager.IMPORTANCE_LOW,
-                application.getString(R.string.channel_settings),
-                application.getString(R.string.channel_settings_description)
             )
 
             Log.v("SEVM", "START FORE")

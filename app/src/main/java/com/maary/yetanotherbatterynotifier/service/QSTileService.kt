@@ -1,4 +1,4 @@
-package com.maary.yetanotherbatterynotifier
+package com.maary.yetanotherbatterynotifier.service
 
 import android.Manifest
 import android.app.NotificationChannel
@@ -14,6 +14,7 @@ import android.service.quicksettings.TileService
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
+import com.maary.yetanotherbatterynotifier.R
 
 class QSTileService: TileService() {
 
@@ -36,7 +37,7 @@ class QSTileService: TileService() {
 
         val intent = Intent(this, ForegroundService::class.java)
 
-        if (!ForegroundService.getIsForegroundServiceRunning()){
+        if (!ForegroundService.getIsForegroundServiceRunning() && tile.state == Tile.STATE_INACTIVE){
             createNotificationChannel(
                 NotificationManager.IMPORTANCE_MIN,
                 resources.getString(R.string.default_channel),
@@ -47,17 +48,12 @@ class QSTileService: TileService() {
                 resources.getString(R.string.channel_notify),
                 resources.getString(R.string.channel_notify_description)
             )
-            createNotificationChannel(
-                NotificationManager.IMPORTANCE_LOW,
-                resources.getString(R.string.channel_settings),
-                resources.getString(R.string.channel_settings_description)
-            )
             
             applicationContext.startForegroundService(intent)
             tile.state = Tile.STATE_ACTIVE
             tile.label = getString(R.string.qstile_active)
 
-        }else{
+        }else if (ForegroundService.getIsForegroundServiceRunning() && tile.state == Tile.STATE_ACTIVE){
             Log.v("QST", "trying to stop service")
             applicationContext.stopService(intent)
             tile.state = Tile.STATE_INACTIVE
@@ -82,20 +78,15 @@ class QSTileService: TileService() {
     }
 
     private fun createNotificationChannel(importance:Int ,name:String, descriptionText: String) {
-        //val importance = NotificationManager.IMPORTANCE_DEFAULT
         val channel = NotificationChannel(name, name, importance).apply {
             description = descriptionText
         }
         // Register the channel with the system
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (notificationManager.getNotificationChannel(name)!=null) return
         notificationManager.createNotificationChannel(channel)
     }
-
-//    private fun requestNotificationsPermission() = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-//        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//        putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-//    }.let(::startActivityAndCollapse)
 
     private fun requestNotificationsPermission() {
         val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
@@ -104,8 +95,6 @@ class QSTileService: TileService() {
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE){
             startActivityAndCollapse(pendingIntent)
-        }else {
-            startActivityAndCollapse(intent)
         }
     }
 }

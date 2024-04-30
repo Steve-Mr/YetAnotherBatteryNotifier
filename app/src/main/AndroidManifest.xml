@@ -31,15 +31,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar">
-
-        </activity>
 
         <service
-            android:name=".ForegroundService"
+            android:name=".service.ForegroundService"
             android:exported="false"
             android:foregroundServiceType="specialUse">
             <intent-filter>
@@ -50,10 +44,13 @@
             </intent-filter>
         </service>
         <service
-            android:name=".QSTileService"
+            android:name=".service.QSTileService"
             android:exported="true"
             android:icon="@drawable/tile"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
+                android:value="true" />
+
             <intent-filter>
                 <action android:name="android.service.quicksettings.action.QS_TILE" />
             </intent-filter>

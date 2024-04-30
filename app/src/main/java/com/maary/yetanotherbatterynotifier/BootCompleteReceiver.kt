@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.maary.yetanotherbatterynotifier.service.ForegroundService
 
 class BootCompleteReceiver : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {

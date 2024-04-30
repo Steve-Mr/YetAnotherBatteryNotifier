@@ -1,4 +1,4 @@
-package com.maary.yetanotherbatterynotifier
+package com.maary.yetanotherbatterynotifier.service
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -17,6 +17,10 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.maary.yetanotherbatterynotifier.PreferenceRepository
+import com.maary.yetanotherbatterynotifier.R
+import com.maary.yetanotherbatterynotifier.SettingsActivity
+import com.maary.yetanotherbatterynotifier.SettingsReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

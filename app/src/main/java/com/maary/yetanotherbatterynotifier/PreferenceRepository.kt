@@ -1,7 +1,6 @@
 package com.maary.yetanotherbatterynotifier
 
 import android.content.Context
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.SharedPreferencesMigration
 import androidx.datastore.preferences.core.Preferences
@@ -110,7 +109,6 @@ class PreferenceRepository @Inject constructor(@ApplicationContext context: Cont
         dataStore.edit { preferences ->
             preferences[TEMP_DND] = bool
         }
-        Log.v("SEVM", "SET TEMP DND")
     }
 
     fun getTempDndEnabledTime(): Flow<Long> {
@@ -123,8 +121,6 @@ class PreferenceRepository @Inject constructor(@ApplicationContext context: Cont
         dataStore.edit { preferences ->
             preferences[TEMP_DND_ENABLED_TIME] = time
         }
-        Log.v("SEVM", "SET TEMP DND ENABLED TIME")
-
     }
 
     fun getDndStartTime(): Flow<Date?> {
