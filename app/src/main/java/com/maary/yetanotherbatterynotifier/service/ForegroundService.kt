@@ -45,6 +45,9 @@ class ForegroundService : LifecycleService() {
     @Inject
     lateinit var preferences: PreferenceRepository
 
+    private var level1 = 80
+    private var level2 = 85
+
     val screenReceiver = ScreenReceiver()
     private val chargingReceiver = ChargingReceiver()
     val levelReceiver = BatteryLevelReceiver()
@@ -100,6 +103,14 @@ class ForegroundService : LifecycleService() {
 
     override fun onCreate() {
         super.onCreate()
+
+        preferences.getLevel1().onEach {
+            level1 = it
+        }.launchIn(lifecycleScope)
+        preferences.getLevel2().onEach {
+            level2 = it
+        }.launchIn(lifecycleScope)
+
         lifecycleScope.launch {
             var filter = IntentFilter()
             if (preferences.getAlwaysShow().first()) {
@@ -283,18 +294,11 @@ class ForegroundService : LifecycleService() {
             var endTime = 6 * 60 + 0      // 6:00 AM in minutes
 
             val level: Int? = p1?.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
-            var level1 = 80
-            var level2 = 85
+
 
             var tempDnd = false
             var tempDndStartTime = 0L
 
-            preferences.getLevel1().onEach {
-                level1 = it
-            }.launchIn(lifecycleScope)
-            preferences.getLevel2().onEach {
-                level2 = it
-            }.launchIn(lifecycleScope)
             preferences.getDndStartTime().onEach {
                 startTime = calculateMinutesFromDate(it!!)
             }.launchIn(lifecycleScope)
