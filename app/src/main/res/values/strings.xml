@@ -44,5 +44,7 @@
     <string name="fuck_oem_regular">Inaccurate current readings</string>
     <string name="fuck_oem_hidden_description">They can\'t even adapt the API well.</string>
     <string name="fuck_oem_regular_description">On different OEM devices, the units used by the API for obtaining current magnitude may vary, resulting in values that are too large or too small.</string>
+    <string name="notification_settings">Notification Settings</string>
+    <string name="notification_settings_description">Configure notification importance</string>
 
 </resources>

@@ -22,7 +22,7 @@
             android:name=".SettingsActivity"
             android:exported="true"
             android:label="@string/title_activity_settings"
-            android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
+            android:theme="@android:style/Theme.Material.NoActionBar"
             android:windowSoftInputMode="adjustResize">
 
             <intent-filter>
