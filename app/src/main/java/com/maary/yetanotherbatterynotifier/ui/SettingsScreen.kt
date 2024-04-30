@@ -25,6 +25,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
+import com.maary.yetanotherbatterynotifier.R
 import com.maary.yetanotherbatterynotifier.SettingsViewModel
 import com.maary.yetanotherbatterynotifier.ui.theme.YetAnotherBatteryNotifierTheme
 
@@ -58,8 +59,6 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
                 .verticalScroll(rememberScrollState())
         ) {
             SettingsComponents().EnableForegroundRow(
-                title = "前台服务",
-                description = "显示状态",
                 state = settingsViewModel.foregroundSwitchState.collectAsState().value,
                 onCheckedChange = { settingsViewModel.foregroundSwitchOnChecked(it) },
                 onNotificationSettingsClicked = {
@@ -69,8 +68,6 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
                     context.startActivity(intent)
                 })
             SettingsComponents().AlertPercentRow(
-                title = "提醒档位1",
-                description = "充电至该水平将发出通知",
                 level1 = settingsViewModel.notifyLevel1State.collectAsState().value,
                 onLevel1Change = { settingsViewModel.onLevel1Changed(it) },
                 onLevel1Finished = { settingsViewModel.onLevel1Finished() },
@@ -79,19 +76,15 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
                 onLevel2Finished = { settingsViewModel.onLevel2Finished() },
             )
             SettingsComponents().SwitchRow(
-                title = "常态显示",
-                description = "未充电时也显示状态",
+                title = stringResource(id = R.string.always_show_current),
+                description = stringResource(id = R.string.always_show_current_summary),
                 state = settingsViewModel.alwaysOnSwitchState.collectAsState().value,
                 onCheckedChange = { settingsViewModel.alwaysOnSwitchOnChecked(it) })
             SettingsComponents().DropdownRow(
-                title = "更新频率",
-                description = "更新速度将按照你的设置进行，分为不同的档位",
                 options = SettingsViewModel.FREQUENCY_OPTIONS,
                 position = settingsViewModel.frequencyIndexState.collectAsState().value,
                 onItemClicked = { settingsViewModel.frequencyItemClicked(it) })
             SettingsComponents().DNDRow(
-                title = "DND 起止时间",
-                description = "此时间内不发布通知",
                 state = settingsViewModel.dndSwitchState.collectAsState().value,
                 onCheckedChange = { settingsViewModel.dndSwitchOnChecked(it) },
                 startTime = settingsViewModel.dndStartState.collectAsState().value,

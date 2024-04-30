@@ -36,15 +36,26 @@
     <string name="fucking_high">High!</string>
     <string name="fucking_low">Low!</string>
     <string name="dnd_1hour">DND 1h</string>
-    <string name="dnd">dnd</string>
-    <string name="dnd_enable_time">dnd_enabled_time</string>
-    <string name="dnd_ing">dnding</string>
-    <string name="title_activity_settings">SettingsActivity</string>
+    <string name="dnd" translatable="false">dnd</string>
+    <string name="dnd_enable_time" translatable="false">dnd_enabled_time</string>
+    <string name="dnd_ing">Dnding</string>
+    <string name="title_activity_settings" translatable="false">SettingsActivity</string>
     <string name="fuck_oem_hidden">FUCK OEMs</string>
     <string name="fuck_oem_regular">Inaccurate current readings</string>
     <string name="fuck_oem_hidden_description">They can\'t even adapt the API well.</string>
-    <string name="fuck_oem_regular_description">On different OEM devices, the units used by the API for obtaining current magnitude may vary, resulting in values that are too large or too small.</string>
+    <string name="fuck_oem_regular_description">On different OEM devices, the units used by the API for obtaining current magnitude may vary, resulting in values that are too large or too small</string>
     <string name="notification_settings">Notification Settings</string>
     <string name="notification_settings_description">Configure notification importance</string>
+    <string name="enable_foreground_service">Enable Service</string>
+    <string name="enable_foreground_service_description">Start monitoring battery current and temperature</string>
+    <string name="charge_notification">When To Notify</string>
+    <string name="charge_notification_description">Send notification when the battery level reaches the set values</string>
+    <string name="notification_level_1">Limit 1</string>
+    <string name="notification_level_2">Limit 2</string>
+    <string name="frequency_description">Information update frequency</string>
+    <string name="dnd_enable_title">DND Routine</string>
+    <string name="dnd_enable_description">Notifications will not be sent during the following time period</string>
+    <string name="dnd_start_time">Start</string>
+    <string name="dnd_end_time">End</string>
 
 </resources>

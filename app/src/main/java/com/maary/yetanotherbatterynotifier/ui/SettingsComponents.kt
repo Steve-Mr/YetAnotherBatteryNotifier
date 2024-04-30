@@ -248,28 +248,29 @@ class SettingsComponents {
         onCheckedChange: (Boolean) -> Unit
     ) {
         Row(
-            modifier =
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextContent(title = title, description = description)
+            TextContent(modifier = Modifier.weight(1f), title = title, description = description)
             Switch(checked = state, onCheckedChange = onCheckedChange)
         }
     }
 
     @Composable
     fun EnableForegroundRow(
-        title: String,
-        description: String,
         state: Boolean,
         onCheckedChange: (Boolean) -> Unit,
         onNotificationSettingsClicked: () -> Unit
     ) {
         Column {
-            SwitchRow(title = title, description = description, state = state, onCheckedChange = onCheckedChange)
+            SwitchRow(
+                title = stringResource(id = R.string.enable_foreground_service),
+                description = stringResource(id = R.string.enable_foreground_service_description),
+                state = state,
+                onCheckedChange = onCheckedChange)
             if (state) {
                 TextContent(
                     modifier = Modifier
@@ -283,8 +284,7 @@ class SettingsComponents {
     }
 
     @Composable
-    fun AlertPercentRow(title: String, description: String,
-                        level1: Float, level2: Float,
+    fun AlertPercentRow(level1: Float, level2: Float,
                         onLevel1Change: (Float) -> Unit, onLevel1Finished: () -> Unit,
                         onLevel2Change: (Float) -> Unit, onLevel2Finished: () -> Unit) {
         Column (
@@ -294,22 +294,24 @@ class SettingsComponents {
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.Start
         ){
-            TextContent(title = title, description = description)
+            TextContent(
+                title = stringResource(id = R.string.charge_notification),
+                description = stringResource(id = R.string.charge_notification_description))
             Row (modifier = Modifier.padding(start = 16.dp, top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically){
-                Text("档位1")
+                Text(stringResource(id = R.string.notification_level_1))
                 SliderItem(sliderPosition = level1, onValueChange = onLevel1Change, onValueChangeFinished = onLevel1Finished)
             }
             Row (modifier = Modifier.padding(start = 16.dp, top = 8.dp),
                 verticalAlignment = Alignment.CenterVertically) {
-                Text("档位2")
+                Text(stringResource(id = R.string.notification_level_2))
                 SliderItem(sliderPosition = level2, onValueChange = onLevel2Change, onValueChangeFinished = onLevel2Finished)
             }
         }
     }
 
     @Composable
-    fun DropdownRow(title: String, description: String, options: MutableList<String>, position: Int, onItemClicked: (Int) -> Unit) {
+    fun DropdownRow(options: MutableList<String>, position: Int, onItemClicked: (Int) -> Unit) {
         Row(
             modifier =
             Modifier
@@ -318,7 +320,10 @@ class SettingsComponents {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextContent(modifier = Modifier.weight(3f), title = title, description = description)
+            TextContent(
+                modifier = Modifier.weight(3f),
+                title = stringResource(id = R.string.frequency),
+                description = stringResource(id = R.string.frequency_description))
             DropdownItem(modifier = Modifier.weight(2f), options = options,
                 position = position, onItemClicked = onItemClicked)
         }
@@ -326,8 +331,6 @@ class SettingsComponents {
 
     @Composable
     fun DNDRow(
-        title: String,
-        description: String,
         state: Boolean,
         onCheckedChange: (Boolean) -> Unit,
         startTime: Date,
@@ -338,13 +341,18 @@ class SettingsComponents {
             verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.Start
         ){
-            SwitchRow(title = title, description = description, state = state, onCheckedChange = onCheckedChange)
+            SwitchRow(
+                title = stringResource(id = R.string.dnd_enable_title),
+                description = stringResource(id = R.string.dnd_enable_description),
+                state = state, onCheckedChange = onCheckedChange)
             Column (
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp)){
-                TimePickerItem(title = "开始时间", time = startTime, onConfirm = onStartSet)
-                TimePickerItem(title = "结束时间", time = endTime, onConfirm = onEndSet)
+                TimePickerItem(title = stringResource(id = R.string.dnd_start_time),
+                    time = startTime, onConfirm = onStartSet)
+                TimePickerItem(title = stringResource(id = R.string.dnd_end_time),
+                    time = endTime, onConfirm = onEndSet)
             }
 
         }
@@ -361,7 +369,10 @@ class SettingsComponents {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Top
         ) {
-            TextContent(modifier = Modifier.weight(1f), title = title, description = description)
+            TextContent(
+                modifier = Modifier.weight(1f),
+                title = title,
+                description = description)
             Column(
                 modifier =
                 Modifier.wrapContentWidth(),
@@ -439,7 +450,7 @@ class SettingsComponents {
                     ),
                     title = {
                         Text(
-                            "Large Top App Bar",
+                            stringResource(id = R.string.settings),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
