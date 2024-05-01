@@ -15,12 +15,14 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.maary.yetanotherbatterynotifier.PreferenceRepository
 import com.maary.yetanotherbatterynotifier.R
 import com.maary.yetanotherbatterynotifier.SettingsActivity
 import com.maary.yetanotherbatterynotifier.SettingsReceiver
+import com.maary.yetanotherbatterynotifier.Widget
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,6 +54,12 @@ class ForegroundService : LifecycleService() {
     private val chargingReceiver = ChargingReceiver()
     val levelReceiver = BatteryLevelReceiver()
 
+    private val _currentFlow = MutableStateFlow(0L)
+    val currentFlow: StateFlow<Long> = _currentFlow
+
+    private val _temperatureFlow = MutableStateFlow(0)
+    val temperatureFlow: StateFlow<Int> = _temperatureFlow
+
     companion object {
         private val _isForegroundServiceRunning = MutableStateFlow(false)
         val isForegroundServiceRunning: StateFlow<Boolean>
@@ -60,6 +68,13 @@ class ForegroundService : LifecycleService() {
         @JvmStatic
         fun getIsForegroundServiceRunning(): Boolean {
             return _isForegroundServiceRunning.value
+        }
+
+        private var instance: ForegroundService? = null
+
+        @JvmStatic
+        fun getInstance(): ForegroundService {
+            return instance ?: throw IllegalStateException("ForegroundService instance has not been initialized.")
         }
     }
 
@@ -129,6 +144,8 @@ class ForegroundService : LifecycleService() {
             filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
             registerReceiver(chargingReceiver, filter)
         }
+
+        instance = this
     }
 
     override fun onDestroy() {
@@ -142,6 +159,7 @@ class ForegroundService : LifecycleService() {
             this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(1)
         notificationManager.cancel(2)
+        instance = null
         super.onDestroy()
     }
 
@@ -172,6 +190,11 @@ class ForegroundService : LifecycleService() {
                     val currentNow: Long =
                         -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
                             .div(ratio)
+
+                    _currentFlow.value = currentNow
+                    _temperatureFlow.value = (batteryStatus?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)
+                        ?.div(10) ?: 0)
+
                     notificationManager.notify(
                         1,
                         updateNotificationInfo(
@@ -189,6 +212,10 @@ class ForegroundService : LifecycleService() {
                             priority = NotificationCompat.PRIORITY_MIN
                         )
                     )
+
+                    lifecycleScope.launch {
+                        Widget().updateAll(applicationContext)
+                    }
                     Log.v("RUNNING", "timer task")
                 }
             }, 0, frequency)
