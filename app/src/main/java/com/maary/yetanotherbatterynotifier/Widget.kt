@@ -47,7 +47,7 @@ class Widget: GlanceAppWidget() {
         ){
             Text(
                 modifier = GlanceModifier
-                    .padding(8.dp),
+                    .padding(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
                 text = "$currentNow mA",
                 style = TextStyle(
                     color = GlanceTheme.colors.onTertiaryContainer,
