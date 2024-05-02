@@ -463,14 +463,14 @@ class SettingsComponents {
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-                    navigationIcon = {
-                        IconButton(onClick = { /* do something */ }) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Localized description"
-                            )
-                        }
-                    },
+//                    navigationIcon = {
+//                        IconButton(onClick = { /* do something */ }) {
+//                            Icon(
+//                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                                contentDescription = "Localized description"
+//                            )
+//                        }
+//                    },
                     scrollBehavior = scrollBehavior
                 )
             },

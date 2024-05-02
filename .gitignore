@@ -18,3 +18,4 @@ local.properties
 /.idea/appInsightsSettings.xml
 /app/src/androidTest
 /app/src/test
+key.properties
