@@ -27,6 +27,8 @@
     <string name="cancel">Cancel</string>
     <string name="string_monitoring" translatable="false">%1$s mA | %2$s °C</string>
     <string name="charged">Your phone has been charged to %1$d%2$s.</string>
+    <string name="notification_dnd_info_start">\nDND will start at %1$s</string>
+    <string name="notification_dnd_info_end">\nDND will end at %1$s</string>
     <string name="current_scale">Current is so fucking LARGE/SMALL!</string>
     <string name="always_show_current_summary">Always show battery current even when discharging.</string>
     <string name="frequency_summary">How often should YABN update battery data?</string>

@@ -108,11 +108,6 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
         }
     }
 }
-
-
-
-
-//@Preview(showSystemUi = true)
 @Preview(showBackground = true)
 @Composable
 fun ScreenPreview() {

@@ -15,12 +15,14 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.getSystemService
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.maary.yetanotherbatterynotifier.PreferenceRepository
 import com.maary.yetanotherbatterynotifier.R
 import com.maary.yetanotherbatterynotifier.SettingsActivity
-import com.maary.yetanotherbatterynotifier.SettingsReceiver
+import com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver
+import com.maary.yetanotherbatterynotifier.Widget
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,6 +54,12 @@ class ForegroundService : LifecycleService() {
     private val chargingReceiver = ChargingReceiver()
     val levelReceiver = BatteryLevelReceiver()
 
+    private val _currentFlow = MutableStateFlow(0L)
+    val currentFlow: StateFlow<Long> = _currentFlow
+
+    private val _temperatureFlow = MutableStateFlow(0)
+    val temperatureFlow: StateFlow<Int> = _temperatureFlow
+
     companion object {
         private val _isForegroundServiceRunning = MutableStateFlow(false)
         val isForegroundServiceRunning: StateFlow<Boolean>
@@ -60,6 +68,13 @@ class ForegroundService : LifecycleService() {
         @JvmStatic
         fun getIsForegroundServiceRunning(): Boolean {
             return _isForegroundServiceRunning.value
+        }
+
+        private var instance: ForegroundService? = null
+
+        @JvmStatic
+        fun getInstance(): ForegroundService {
+            return instance ?: throw IllegalStateException("ForegroundService instance has not been initialized.")
         }
     }
 
@@ -129,6 +144,8 @@ class ForegroundService : LifecycleService() {
             filter.addAction(Intent.ACTION_POWER_DISCONNECTED)
             registerReceiver(chargingReceiver, filter)
         }
+
+        instance = this
     }
 
     override fun onDestroy() {
@@ -142,6 +159,7 @@ class ForegroundService : LifecycleService() {
             this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(1)
         notificationManager.cancel(2)
+        instance = null
         super.onDestroy()
     }
 
@@ -172,6 +190,11 @@ class ForegroundService : LifecycleService() {
                     val currentNow: Long =
                         -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
                             .div(ratio)
+
+                    _currentFlow.value = currentNow
+                    _temperatureFlow.value = (batteryStatus?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)
+                        ?.div(10) ?: 0)
+
                     notificationManager.notify(
                         1,
                         updateNotificationInfo(
@@ -189,6 +212,10 @@ class ForegroundService : LifecycleService() {
                             priority = NotificationCompat.PRIORITY_MIN
                         )
                     )
+
+                    lifecycleScope.launch {
+                        Widget().updateAll(applicationContext)
+                    }
                     Log.v("RUNNING", "timer task")
                 }
             }, 0, frequency)
@@ -312,8 +339,10 @@ class ForegroundService : LifecycleService() {
                 tempDndStartTime = it
             }.launchIn(lifecycleScope)
 
-
-            val isNightTime = currentTime >= startTime || currentTime <= endTime
+            val isNightTime = if (endTime < startTime) { currentTime >= startTime || currentTime <= endTime }
+                                else {
+                                    currentTime in startTime..endTime
+                                }
 
             if (isNightTime || (tempDnd && (System.currentTimeMillis()
                     .minus(tempDndStartTime)) < 1000 * 60 * 60)
@@ -363,6 +392,60 @@ class ForegroundService : LifecycleService() {
         priority: Int
     ): Notification {
 
+        var dndTitleResource = R.string.dnd_1hour
+        var contentFinal = content
+
+        runBlocking {
+            if (preferences.getTempDnd().first()) {
+                val dndSetTime: Long = preferences.getTempDndEnabledTime().first()
+                if ((System.currentTimeMillis() - dndSetTime) < 1000 * 60 * 60) {
+                    dndTitleResource = R.string.dnd_ing
+                    val calendar = Calendar.getInstance().apply {
+                        timeInMillis = dndSetTime
+                    }
+                    val h = "%02d".format(calendar.get(Calendar.HOUR_OF_DAY) + 1)
+                    val m = "%02d".format(calendar.get(Calendar.MINUTE))
+                    contentFinal += getString(R.string.notification_dnd_info_end, "$h:$m")
+                } else {
+                    preferences.setTempDnd(false)
+                }
+            }else if(preferences.getDndSet().first()) {
+                val currentTime = Calendar.getInstance().apply {
+                    time = Date()
+                }
+                val startTime = Calendar.getInstance().apply {
+                    time = preferences.getDndStartTime().first()!!
+                }
+                val endTime = Calendar.getInstance().apply {
+                    time = preferences.getDndEndTime().first()!!
+                }
+
+                val currentMinutes = currentTime.get(Calendar.HOUR_OF_DAY) * 60 + currentTime.get(Calendar.MINUTE)
+                val startMinutes = startTime.get(Calendar.MINUTE) + startTime.get(Calendar.HOUR_OF_DAY) * 60
+                val endMinutes = endTime.get(Calendar.MINUTE) + endTime.get(Calendar.HOUR_OF_DAY) * 60
+
+                val sh = "%02d".format( startMinutes / 60)
+                val sm = "%02d".format(( startMinutes ) % 60)
+
+                val eh = "%02d".format(endMinutes / 60)
+                val em = "%02d".format(( endMinutes ) % 60)
+
+                if (endMinutes < startMinutes) {
+                    if (currentMinutes >= startMinutes || currentMinutes <= endMinutes) {
+                        dndTitleResource = R.string.dnd_ing
+                        contentFinal += getString(R.string.notification_dnd_info_end, "$eh:$em")
+                    } else {
+                        contentFinal += getString(R.string.notification_dnd_info_start, "$sh:$sm")
+                    }
+                } else if (currentMinutes in startMinutes..endMinutes) {
+                    dndTitleResource = R.string.dnd_ing
+                    contentFinal += getString(R.string.notification_dnd_info_end, "$eh:$em")
+                } else {
+                    contentFinal += getString(R.string.notification_dnd_info_start, "$sh:$sm")
+                }
+            }
+        }
+
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setOngoing(isOnGoing)
             .setSmallIcon(icon)
@@ -370,7 +453,7 @@ class ForegroundService : LifecycleService() {
             .setContentTitle(title)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setOnlyAlertOnce(isAlertOnce)
-            .setContentText(content)
+            .setContentText(contentFinal)
             .setPriority(priority)
 
         if (withAction) {
@@ -384,30 +467,18 @@ class ForegroundService : LifecycleService() {
             ).build()
 
             val sleepIntent = Intent(this, SettingsReceiver::class.java).apply {
-                action = "com.maary.yetanotherbatterynotifier.SettingsReceiver.dnd"
+                action = "com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver.dnd"
             }
 
             val sleepPendingIntent: PendingIntent =
                 PendingIntent.getBroadcast(this, 0, sleepIntent, PendingIntent.FLAG_IMMUTABLE)
-
-            var dndTitleResource = R.string.dnd_1hour
-
-            runBlocking {
-                if (preferences.getTempDnd().first()) {
-                    val dndSetTime: Long = preferences.getTempDndEnabledTime().first()
-                    if ((System.currentTimeMillis() - dndSetTime) < 1000 * 60 * 60) {
-                        dndTitleResource = R.string.dnd_ing
-                    } else {
-                        preferences.setTempDnd(false)
-                    }
-                }
-            }
 
             val actionSleep: NotificationCompat.Action = NotificationCompat.Action.Builder(
                 R.drawable.ic_dnd,
                 resources.getString(dndTitleResource),
                 sleepPendingIntent
             ).build()
+
 
             notificationBuilder.addAction(actionSettings)
             notificationBuilder.addAction(actionSleep)

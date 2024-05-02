@@ -11,13 +11,14 @@
         android:name=".YABNApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
+        android:enableOnBackInvokedCallback="true"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
-        tools:targetApi="31">
+        tools:targetApi="tiramisu">
         <activity
             android:name=".SettingsActivity"
             android:exported="true"
@@ -48,7 +49,8 @@
             android:exported="true"
             android:icon="@drawable/tile"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
-            <meta-data android:name="android.service.quicksettings.ACTIVE_TILE"
+            <meta-data
+                android:name="android.service.quicksettings.ACTIVE_TILE"
                 android:value="true" />
 
             <intent-filter>
@@ -57,7 +59,7 @@
         </service>
 
         <receiver
-            android:name=".BootCompleteReceiver"
+            android:name=".receiver.BootCompleteReceiver"
             android:exported="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT" />
@@ -68,12 +70,24 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".SettingsReceiver"
+            android:name=".receiver.SettingsReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver" />
             </intent-filter>
         </receiver>
+
+        <receiver
+            android:name=".receiver.WidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_info" />
+        </receiver>
+
     </application>
 
 </manifest>
