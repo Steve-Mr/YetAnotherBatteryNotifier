@@ -59,7 +59,7 @@
         </service>
 
         <receiver
-            android:name=".BootCompleteReceiver"
+            android:name=".receiver.BootCompleteReceiver"
             android:exported="true">
             <intent-filter android:priority="1000">
                 <action android:name="android.intent.action.BOOT" />
@@ -70,7 +70,7 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".SettingsReceiver"
+            android:name=".receiver.SettingsReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver" />
@@ -78,7 +78,7 @@
         </receiver>
 
         <receiver
-            android:name=".WidgetReceiver"
+            android:name=".receiver.WidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
