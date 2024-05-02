@@ -29,7 +29,6 @@ class QSTileService: TileService() {
                 Manifest.permission.POST_NOTIFICATIONS
             ) != PackageManager.PERMISSION_GRANTED
         ) {
-            Log.v("MUTE_", waitMillis.toString())
             requestNotificationsPermission()
             Thread.sleep(waitMillis.toLong())
             waitMillis *= 2
@@ -54,7 +53,6 @@ class QSTileService: TileService() {
             tile.label = getString(R.string.qstile_active)
 
         }else if (ForegroundService.getIsForegroundServiceRunning() && tile.state == Tile.STATE_ACTIVE){
-            Log.v("QST", "trying to stop service")
             applicationContext.stopService(intent)
             tile.state = Tile.STATE_INACTIVE
             tile.label = getString(R.string.qstile_inactive)

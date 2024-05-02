@@ -1,6 +1,5 @@
 package com.maary.yetanotherbatterynotifier.ui
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,14 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
@@ -426,13 +421,11 @@ class SettingsComponents {
                             delay(5000) // 500 milliseconds
                             withContext(Dispatchers.Main) {
                                 clickCount = 0
-                                Log.v("SEVM", "test")
                             }
                         }
                     } else if (clickCount == 5) {
                         job?.cancel()
                         clickCount = 0
-                        Log.v("SEVM", "true dude")
                         enableOEM()
                     }
                 },
@@ -463,14 +456,6 @@ class SettingsComponents {
                             overflow = TextOverflow.Ellipsis
                         )
                     },
-//                    navigationIcon = {
-//                        IconButton(onClick = { /* do something */ }) {
-//                            Icon(
-//                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                                contentDescription = "Localized description"
-//                            )
-//                        }
-//                    },
                     scrollBehavior = scrollBehavior
                 )
             },

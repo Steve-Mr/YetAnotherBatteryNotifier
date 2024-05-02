@@ -93,7 +93,6 @@ class ForegroundService : LifecycleService() {
             priority = NotificationCompat.PRIORITY_MIN
         )
 
-        Log.v("STATE", "foreground service")
         startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)// 2
 
         val batteryStatus: Intent? = registerReceiver(
@@ -149,7 +148,6 @@ class ForegroundService : LifecycleService() {
     }
 
     override fun onDestroy() {
-        Log.v("SERVICE", "onDestroy()")
         _isForegroundServiceRunning.value = false
         unregisterReceiver(chargingReceiver)
         stopTimerTask()
@@ -288,10 +286,7 @@ class ForegroundService : LifecycleService() {
                     registerReceiver(levelReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
                     isLevelReceiver = true
                 }
-
-                Log.v("==CHARGING ALT==", "charging")
             } else if ("android.intent.action.ACTION_POWER_DISCONNECTED" == p1.action) {
-                Log.v("==DISCHARGED ALT==", "not charging")
                 val notificationManager: NotificationManager =
                     p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(2)

@@ -15,8 +15,6 @@ import javax.inject.Inject
 class SettingsReceiver : BroadcastReceiver() {
     @Inject lateinit var preferences: PreferenceRepository
     override fun onReceive(p0: Context?, p1: Intent?) {
-        Log.v("SETTINGS", "received")
-
         if ("com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver.dnd" == p1?.action) {
             CoroutineScope(Dispatchers.IO).launch {
                 preferences.setTempDnd(true)

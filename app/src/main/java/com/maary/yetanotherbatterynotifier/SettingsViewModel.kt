@@ -4,12 +4,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
-import android.os.Bundle
-import android.provider.Settings
-import android.util.Log
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maary.yetanotherbatterynotifier.service.ForegroundService
@@ -67,15 +61,10 @@ class SettingsViewModel @Inject constructor(
                 application.getString(R.string.channel_notify),
                 application.getString(R.string.channel_notify_description)
             )
-
-            Log.v("SEVM", "START FORE")
             application.startForegroundService(intent)
         }else {
-            Log.v("SEVM", "END FORE")
-
             application.stopService(intent)
         }
-//        _foregroundSwitchState.value = ForegroundService.isForegroundServiceRunning()
     }
 
     /**
@@ -193,20 +182,11 @@ class SettingsViewModel @Inject constructor(
     }
 
     private val _fuckOEMEnabled = MutableStateFlow(false)
-    val fuckOEMEnabled = _fuckOEMEnabled.asStateFlow()
 
     private val _oemTitle = MutableStateFlow(R.string.fuck_oem_regular)
     private val _oemDescription = MutableStateFlow(R.string.fuck_oem_regular_description)
     val oemTitle = _oemTitle.asStateFlow()
     val oemDescription = _oemDescription.asStateFlow()
-
-    fun getOEMLabel(): Int {
-        return if (_fuckOEMEnabled.value) {
-            R.string.fuck_oem_hidden
-        } else {
-            R.string.fuck_oem_regular
-        }
-    }
 
     fun getOEMDescription(): Int {
         return if (_fuckOEMEnabled.value) {
@@ -236,7 +216,6 @@ class SettingsViewModel @Inject constructor(
      * 值太小
      * */
     fun onUpscaleClicked() {
-        Log.v("SEVM", "UP")
         viewModelScope.launch {
             preferenceRepository.setRatio(1)
         }
@@ -247,7 +226,6 @@ class SettingsViewModel @Inject constructor(
      * 值太大
      * */
     fun onDownscaleClicked() {
-        Log.v("SEVM", "DOWN")
         viewModelScope.launch {
             preferenceRepository.setRatio(1000)
         }
@@ -259,7 +237,6 @@ class SettingsViewModel @Inject constructor(
             _notifyLevel1State.value = it.toFloat()
         }.launchIn(viewModelScope)
         preferenceRepository.getLevel2().onEach{
-            Log.v("SEVM", it.toString())
             _notifyLevel2State.value = it.toFloat()
         }.launchIn(viewModelScope)
         preferenceRepository.getAlwaysShow().onEach {
@@ -267,8 +244,6 @@ class SettingsViewModel @Inject constructor(
         }.launchIn(viewModelScope)
         preferenceRepository.getFrequency().onEach {
             val index = FREQUENCY_LONG.indexOf(it)
-            Log.v("SEVM", "FRE $index")
-
             _frequencyIndexState.value =
                 if (index != -1) index
                 else FREQUENCY_LONG.indexOf(5000L)
