@@ -22,8 +22,8 @@
     <string name="cancel">取消</string>
     <string name="yet_another_battery_notifier_is_running">Yet Another Battery Notifier 正在运行</string>
     <string name="charged">已充电至 %1$d%2$s.</string>
-    <string name="notification_dnd_info_start">\\n将于 %1$s 起静音</string>
-    <string name="notification_dnd_info_end">\\n将于 %1$s 结束静音</string>
+    <string name="notification_dnd_info_start">\n将于 %1$s 起静音</string>
+    <string name="notification_dnd_info_end">\n将于 %1$s 结束静音</string>
     <string name="current_scale">电流太他妈的大！/小！了</string>
     <string name="always_show_current_summary">即使没有充电也始终显示电流大小</string>
     <string name="frequency_summary">YABN 应该多久更新一次数据？</string>
