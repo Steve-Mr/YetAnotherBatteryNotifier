@@ -18,6 +18,7 @@ import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
@@ -50,38 +51,42 @@ class Widget: GlanceAppWidget() {
             action = "com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver.dnd"
         }
 
-        Column (
-            modifier = GlanceModifier.fillMaxSize()
-                .background(GlanceTheme.colors.tertiaryContainer)
-                .clickable(onClick = actionStartActivity<SettingsActivity>()),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Text(
-                modifier = GlanceModifier
-                    .padding(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
-                text = "$currentNow mA",
-                style = TextStyle(
-                    color = GlanceTheme.colors.onTertiaryContainer,
-                    textAlign = TextAlign.Start
-                ),
-                maxLines = 1,
-            )
-            Text(
-                modifier = GlanceModifier.padding(8.dp),
-                text = "$temperatureNow ℃",
-                style = TextStyle(
-                    color = GlanceTheme.colors.onTertiaryContainer,
-                    textAlign = TextAlign.End
-                ),
-                maxLines = 1
-            )
-            Button(
-                text = if (dndState) context.getString(R.string.dnd) else context.getString(R.string.dnd_ing),
-                onClick = actionSendBroadcast(sleepIntent),
-                enabled = !dndState
-            )
+        Box(modifier = GlanceModifier.padding(vertical = 20.dp)){
+            Column (
+                modifier = GlanceModifier.fillMaxSize()
+                    .background(GlanceTheme.colors.tertiaryContainer)
+                    .clickable(onClick = actionStartActivity<SettingsActivity>()),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                Text(
+                    modifier = GlanceModifier
+                        .padding(start = 4.dp, end = 4.dp, top = 8.dp, bottom = 8.dp),
+                    text = "$currentNow mA",
+                    style = TextStyle(
+                        color = GlanceTheme.colors.onTertiaryContainer,
+                        textAlign = TextAlign.Start
+                    ),
+                    maxLines = 1,
+                )
+                Text(
+                    modifier = GlanceModifier.padding(8.dp),
+                    text = "$temperatureNow ℃",
+                    style = TextStyle(
+                        color = GlanceTheme.colors.onTertiaryContainer,
+                        textAlign = TextAlign.End
+                    ),
+                    maxLines = 1
+                )
+                Button(
+                    text = if (dndState) context.getString(R.string.dnd_ing) else context.getString(R.string.dnd),
+                    onClick = actionSendBroadcast(sleepIntent),
+                    enabled = !dndState
+                )
+            }
         }
+
+
     }
 
 }
