@@ -55,6 +55,8 @@ class Widget : GlanceAppWidget() {
         Column(
             modifier = GlanceModifier
                 .clickable(onClick = actionStartActivity<SettingsActivity>()),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(
                 modifier = GlanceModifier
