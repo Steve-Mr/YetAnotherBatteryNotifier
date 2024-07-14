@@ -1,23 +1,19 @@
 package com.maary.yetanotherbatterynotifier
 
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
-import androidx.glance.action.ActionParameters
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
-import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionSendBroadcast
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
@@ -46,8 +42,11 @@ class Widget: GlanceAppWidget() {
         val fService = remember { ForegroundService.getInstance() }
         val currentNow = fService.currentFlow.collectAsState().value
         val temperatureNow = fService.temperatureFlow.collectAsState().value
+        val dndState = fService.dndFlow.collectAsState().value
 
-        val sleepIntent = Intent(LocalContext.current, SettingsReceiver::class.java).apply {
+        val context = LocalContext.current
+
+        val sleepIntent = Intent(context, SettingsReceiver::class.java).apply {
             action = "com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver.dnd"
         }
 
@@ -78,8 +77,9 @@ class Widget: GlanceAppWidget() {
                 maxLines = 1
             )
             Button(
-                text = LocalContext.current.getString(R.string.dnd),
-                onClick = actionSendBroadcast(sleepIntent)
+                text = if (dndState) context.getString(R.string.dnd) else context.getString(R.string.dnd_ing),
+                onClick = actionSendBroadcast(sleepIntent),
+                enabled = !dndState
             )
         }
     }

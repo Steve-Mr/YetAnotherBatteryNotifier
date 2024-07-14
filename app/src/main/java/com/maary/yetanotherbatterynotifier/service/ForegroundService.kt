@@ -60,6 +60,9 @@ class ForegroundService : LifecycleService() {
     private val _temperatureFlow = MutableStateFlow(0)
     val temperatureFlow: StateFlow<Int> = _temperatureFlow
 
+    private val _dndState = MutableStateFlow(false)
+    val dndFlow: StateFlow<Boolean> = _dndState
+
     companion object {
         private val _isForegroundServiceRunning = MutableStateFlow(false)
         val isForegroundServiceRunning: StateFlow<Boolean>
@@ -332,7 +335,10 @@ class ForegroundService : LifecycleService() {
 
                     if (isNightTime || isTempDnd) {
                         Log.v("YABN", "SHUUUUUUUUUU")
+                        _dndState.value = true
                         return@runBlocking
+                    } else {
+                        _dndState.value = false
                     }
 
                     if (level != null) {
