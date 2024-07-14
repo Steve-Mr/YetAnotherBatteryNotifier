@@ -66,7 +66,9 @@ class Widget : GlanceAppWidget() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(modifier = GlanceModifier.padding(4.dp)) {
+                Column(modifier = GlanceModifier.padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         modifier = GlanceModifier
                             .background(GlanceTheme.colors.tertiary)
