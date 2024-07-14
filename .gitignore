@@ -19,3 +19,4 @@ local.properties
 /app/src/androidTest
 /app/src/test
 key.properties
+/.idea

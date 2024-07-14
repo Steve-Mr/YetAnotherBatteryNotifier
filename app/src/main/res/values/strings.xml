@@ -38,7 +38,7 @@
     <string name="fucking_high">High!</string>
     <string name="fucking_low">Low!</string>
     <string name="dnd_1hour">DND 1h</string>
-    <string name="dnd" translatable="false">dnd</string>
+    <string name="dnd" translatable="false">DND</string>
     <string name="dnd_enable_time" translatable="false">dnd_enabled_time</string>
     <string name="dnd_ing">Dnding</string>
     <string name="title_activity_settings" translatable="false">SettingsActivity</string>

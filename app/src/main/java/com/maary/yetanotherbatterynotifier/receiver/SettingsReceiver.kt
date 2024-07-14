@@ -16,6 +16,7 @@ class SettingsReceiver : BroadcastReceiver() {
     @Inject lateinit var preferences: PreferenceRepository
     override fun onReceive(p0: Context?, p1: Intent?) {
         if ("com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver.dnd" == p1?.action) {
+            Log.v("YABN", "GOT TEMP DND")
             CoroutineScope(Dispatchers.IO).launch {
                 preferences.setTempDnd(true)
                 preferences.setTempDndEnabledTime(System.currentTimeMillis())
