@@ -70,9 +70,12 @@
         </receiver>
         <receiver
             android:name=".receiver.SettingsReceiver"
-            android:exported="false">
+            android:exported="true"
+            android:enabled="true">
             <intent-filter>
                 <action android:name="com.maary.yetanotherbatterynotifier.SettingsReceiver" />
+                <action android:name="com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver.dnd" />
+                <action android:name="com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver" />
             </intent-filter>
         </receiver>
 

@@ -335,10 +335,7 @@ class ForegroundService : LifecycleService() {
 
                     if (isNightTime || isTempDnd) {
                         Log.v("YABN", "SHUUUUUUUUUU")
-                        _dndState.value = true
                         return@runBlocking
-                    } else {
-                        _dndState.value = false
                     }
 
                     if (level != null) {
@@ -400,8 +397,10 @@ class ForegroundService : LifecycleService() {
                     val h = "%02d".format(calendar.get(Calendar.HOUR_OF_DAY) + 1)
                     val m = "%02d".format(calendar.get(Calendar.MINUTE))
                     contentFinal += getString(R.string.notification_dnd_info_end, "$h:$m")
+                    _dndState.value = true
                 } else {
                     preferences.setTempDnd(false)
+                    _dndState.value = false
                 }
             }else if(preferences.getDndSet().first()) {
                 val currentTime = Calendar.getInstance().apply {
@@ -428,14 +427,18 @@ class ForegroundService : LifecycleService() {
                     if (currentMinutes >= startMinutes || currentMinutes <= endMinutes) {
                         dndTitleResource = R.string.dnd_ing
                         contentFinal += getString(R.string.notification_dnd_info_end, "$eh:$em")
+                        _dndState.value = true
                     } else {
                         contentFinal += getString(R.string.notification_dnd_info_start, "$sh:$sm")
+                        _dndState.value = false
                     }
                 } else if (currentMinutes in startMinutes..endMinutes) {
                     dndTitleResource = R.string.dnd_ing
                     contentFinal += getString(R.string.notification_dnd_info_end, "$eh:$em")
+                    _dndState.value = true
                 } else {
                     contentFinal += getString(R.string.notification_dnd_info_start, "$sh:$sm")
+                    _dndState.value = false
                 }
             }
         }
