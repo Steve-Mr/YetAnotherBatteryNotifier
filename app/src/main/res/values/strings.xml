@@ -59,5 +59,7 @@
     <string name="dnd_enable_description">Notifications will not be sent during the following time period</string>
     <string name="dnd_start_time">Start</string>
     <string name="dnd_end_time">End</string>
+    <string name="dnd_content_description_on">DND state ON</string>
+    <string name="dnd_content_description_off">DND state OFF</string>
 
 </resources>

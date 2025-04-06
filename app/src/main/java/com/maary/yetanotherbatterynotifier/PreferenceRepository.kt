@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -96,6 +97,15 @@ class PreferenceRepository @Inject constructor(@ApplicationContext context: Cont
     suspend fun setFrequency(frequency: Long) {
         dataStore.edit { preferences ->
             preferences[FREQUENCY] = frequency
+        }
+    }
+
+    suspend fun toggleTempDnd() {
+        if (getTempDnd().first()){
+            setTempDnd(false)
+        } else {
+            setTempDnd(true)
+            setTempDndEnabledTime(System.currentTimeMillis())
         }
     }
 

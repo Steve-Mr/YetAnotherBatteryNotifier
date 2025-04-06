@@ -21,8 +21,8 @@ import androidx.lifecycle.lifecycleScope
 import com.maary.yetanotherbatterynotifier.PreferenceRepository
 import com.maary.yetanotherbatterynotifier.R
 import com.maary.yetanotherbatterynotifier.SettingsActivity
-import com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver
 import com.maary.yetanotherbatterynotifier.Widget
+import com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -466,7 +466,7 @@ class ForegroundService : LifecycleService() {
             notificationBuilder.setContentIntent(settingsPendingIntent)
 
             val sleepIntent = Intent(this, SettingsReceiver::class.java).apply {
-                action = "com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver.dnd"
+                action = "com.maary.yetanotherbatterynotifier.receiver.SettingsReceiver.dnd.toggle"
             }
 
             val sleepPendingIntent: PendingIntent =

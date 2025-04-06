@@ -50,4 +50,6 @@
     <string name="dnd_enable_description">下面时间段内不会发送通知</string>
     <string name="dnd_start_time">开始时间</string>
     <string name="dnd_end_time">结束时间</string>
+    <string name="dnd_content_description_on">当前是免打扰状态</string>
+    <string name="dnd_content_description_off">当前非免打扰状态</string>
 </resources>
