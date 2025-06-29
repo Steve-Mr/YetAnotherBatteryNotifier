@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -50,7 +51,6 @@ class SettingsViewModel @Inject constructor(
     fun foregroundSwitchOnChecked(state: Boolean) {
         val intent = Intent(application, ForegroundService::class.java)
         if (!_foregroundSwitchState.value){
-
             createNotificationChannel(
                 NotificationManager.IMPORTANCE_MIN,
                 application.getString(R.string.default_channel),
@@ -61,8 +61,12 @@ class SettingsViewModel @Inject constructor(
                 application.getString(R.string.channel_notify),
                 application.getString(R.string.channel_notify_description)
             )
+            viewModelScope.launch { preferenceRepository.setServiceState(true) }
+
             application.startForegroundService(intent)
         }else {
+            viewModelScope.launch { preferenceRepository.setServiceState(false) }
+
             application.stopService(intent)
         }
     }
@@ -233,6 +237,20 @@ class SettingsViewModel @Inject constructor(
     }
 
     init {
+        viewModelScope.launch { //
+            val desiredServiceState = preferenceRepository.getServiceEnabled().first() // 从 DataStore 获取期望状态
+            val actualServiceRunning = ForegroundService.isForegroundServiceRunning.first() // 获取服务的实际运行状态
+
+            // 如果期望状态与实际运行状态不一致，则进行协调
+            if (desiredServiceState != actualServiceRunning) { //
+                val intent = Intent(application, ForegroundService::class.java) //
+                if (desiredServiceState) { // 期望开启但实际未运行，则启动服务
+                    application.startForegroundService(intent)
+                } else { // 期望关闭但实际正在运行，则停止服务
+                    application.stopService(intent)
+                }
+            }
+        }
         preferenceRepository.getLevel1().onEach {
             _notifyLevel1State.value = it.toFloat()
         }.launchIn(viewModelScope)

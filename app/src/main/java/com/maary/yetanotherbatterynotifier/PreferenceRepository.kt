@@ -33,6 +33,7 @@ class PreferenceRepository @Inject constructor(@ApplicationContext context: Cont
     private val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
 
     companion object {
+        val SERVICE_ENABLED = booleanPreferencesKey("service_enabled")
         val LEVEL1 = intPreferencesKey("alert_level_1")
         val LEVEL2 = intPreferencesKey("alert_level_2")
 
@@ -50,6 +51,25 @@ class PreferenceRepository @Inject constructor(@ApplicationContext context: Cont
         val RATIO = intPreferencesKey("ratio")
 
         val ENABLE_FUCK_OEM = booleanPreferencesKey("fuck_oem")
+    }
+
+    fun getServiceEnabled(): Flow<Boolean> {
+        return dataStore.data.map { pref ->
+            pref[SERVICE_ENABLED] ?: false
+        }
+    }
+
+    suspend fun toggleServiceState() {
+        dataStore.edit { pref ->
+            val newState = pref[SERVICE_ENABLED] ?: false
+            pref[SERVICE_ENABLED] = !newState
+        }
+    }
+
+    suspend fun setServiceState(state: Boolean) {
+        dataStore.edit { pref ->
+            pref[SERVICE_ENABLED] = state
+        }
     }
 
     fun getLevel1(): Flow<Int> {
