@@ -44,6 +44,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
@@ -157,7 +160,7 @@ class SettingsComponents {
         Row (modifier = Modifier
             .fillMaxWidth()
             .clickable(enabled = true, onClick = { showTimePicker = true })
-            .padding(top = 8.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
+            .padding(start = 16.dp, end = 16.dp),
             verticalAlignment = Alignment.CenterVertically){
             Text(title)
             Text(modifier = Modifier.padding(start = 8.dp, end = 8.dp),
@@ -268,19 +271,24 @@ class SettingsComponents {
         onNotificationSettingsClicked: () -> Unit
     ) {
         Column {
-            SwitchRow(
-                title = stringResource(id = R.string.enable_foreground_service),
-                description = stringResource(id = R.string.enable_foreground_service_description),
-                state = state,
-                onCheckedChange = onCheckedChange)
+            SettingsItem(position = if (state) GroupPosition.TOP else GroupPosition.SINGLE) {
+                SwitchRow(
+                    title = stringResource(id = R.string.enable_foreground_service),
+                    description = stringResource(id = R.string.enable_foreground_service_description),
+                    state = state,
+                    onCheckedChange = onCheckedChange
+                )
+            }
             if (state) {
-                TextContent(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onNotificationSettingsClicked() }
-                        .padding(start = 32.dp, top = 8.dp, end = 32.dp, bottom = 8.dp),
-                    title = stringResource(id = R.string.notification_settings),
-                    description = stringResource(R.string.notification_settings_description))
+                SettingsItem(position = GroupPosition.BOTTOM) {
+                    TextContent(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNotificationSettingsClicked() }
+                            .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
+                        title = stringResource(id = R.string.notification_settings),
+                        description = stringResource(R.string.notification_settings_description))
+                }
             }
 
         }
@@ -290,25 +298,39 @@ class SettingsComponents {
     fun AlertPercentRow(level1: Float, level2: Float,
                         onLevel1Change: (Float) -> Unit, onLevel1Finished: () -> Unit,
                         onLevel2Change: (Float) -> Unit, onLevel2Finished: () -> Unit) {
-        Column (
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.Start
-        ){
-            TextContent(
-                title = stringResource(id = R.string.charge_notification),
-                description = stringResource(id = R.string.charge_notification_description))
-            Row (modifier = Modifier.padding(start = 16.dp, top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically){
-                Text(stringResource(id = R.string.notification_level_1))
-                SliderItem(sliderPosition = level1, onValueChange = onLevel1Change, onValueChangeFinished = onLevel1Finished)
+        Column {
+            SettingsItem(position = GroupPosition.TOP) {
+                TextContent(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    title = stringResource(id = R.string.charge_notification),
+                    description = stringResource(id = R.string.charge_notification_description)
+                )
             }
-            Row (modifier = Modifier.padding(start = 16.dp, top = 8.dp),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(id = R.string.notification_level_2))
-                SliderItem(sliderPosition = level2, onValueChange = onLevel2Change, onValueChangeFinished = onLevel2Finished)
+            SettingsItem(position = GroupPosition.MIDDLE) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(id = R.string.notification_level_1))
+                    SliderItem(
+                        sliderPosition = level1,
+                        onValueChange = onLevel1Change,
+                        onValueChangeFinished = onLevel1Finished
+                    )
+                }
+            }
+            SettingsItem(position = GroupPosition.BOTTOM) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(id = R.string.notification_level_2))
+                    SliderItem(
+                        sliderPosition = level2,
+                        onValueChange = onLevel2Change,
+                        onValueChangeFinished = onLevel2Finished
+                    )
+                }
             }
         }
     }
@@ -350,12 +372,14 @@ class SettingsComponents {
                 state = state, onCheckedChange = onCheckedChange)
             Column (
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp)){
+                    .fillMaxWidth()){
                 TimePickerItem(title = stringResource(id = R.string.dnd_start_time),
                     time = startTime, onConfirm = onStartSet)
+                Spacer(modifier = Modifier.height(8.dp))
                 TimePickerItem(title = stringResource(id = R.string.dnd_end_time),
                     time = endTime, onConfirm = onEndSet)
+                Spacer(modifier = Modifier.height(8.dp))
+
             }
 
         }
@@ -364,23 +388,18 @@ class SettingsComponents {
     @Composable
     fun FuckOEMRow(title: String, description: String,
                    onUpscaleClicked: () -> Unit, onDownScaleClicked: () -> Unit) {
-        Row(
-            modifier =
-            Modifier
-                .fillMaxWidth()
+        Column(
+            modifier = Modifier.fillMaxWidth()
                 .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Top
         ) {
             TextContent(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier,
                 title = title,
                 description = description)
-            Column(
-                modifier =
-                Modifier.wrapContentWidth(),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 OutlinedButton(
                     modifier = Modifier
@@ -462,5 +481,52 @@ class SettingsComponents {
         ) { innerPadding ->
             content(innerPadding)
         }
+    }
+}
+
+
+enum class GroupPosition {
+    TOP,    // 顶部
+    MIDDLE, // 中间
+    BOTTOM, // 底部
+    SINGLE  // 独立，自成一组
+}
+
+@Composable
+fun SettingsItem(
+    position: GroupPosition,
+    modifier: Modifier = Modifier,
+    containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
+    content: @Composable () -> Unit
+) {
+    // 根据 position 决定圆角形状
+    val shape = when (position) {
+        GroupPosition.TOP -> RoundedCornerShape(
+            topStart = 24.dp,
+            topEnd = 24.dp,
+            bottomStart = 8.dp,
+            bottomEnd = 8.dp
+        )
+
+        GroupPosition.MIDDLE -> RoundedCornerShape(8.dp)
+        GroupPosition.BOTTOM -> RoundedCornerShape(
+            topStart = 8.dp,
+            topEnd = 8.dp,
+            bottomStart = 24.dp,
+            bottomEnd = 24.dp
+        )
+
+        GroupPosition.SINGLE -> RoundedCornerShape(24.dp) // 上下都是大圆角
+    }
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 2.dp)
+            .clip(shape) // 动态应用形状
+            .background(containerColor),
+        contentAlignment = Alignment.Center
+    ) {
+        content()
     }
 }

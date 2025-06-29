@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
@@ -58,6 +60,8 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
                 .padding(top = innerPadding.calculateTopPadding())
                 .verticalScroll(rememberScrollState())
         ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
             SettingsComponents().EnableForegroundRow(
                 state = settingsViewModel.foregroundSwitchState.collectAsState().value,
                 onCheckedChange = { settingsViewModel.foregroundSwitchOnChecked(it) },
@@ -67,6 +71,9 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
                     }
                     context.startActivity(intent)
                 })
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             SettingsComponents().AlertPercentRow(
                 level1 = settingsViewModel.notifyLevel1State.collectAsState().value,
                 onLevel1Change = { settingsViewModel.onLevel1Changed(it) },
@@ -75,31 +82,47 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
                 onLevel2Change = { settingsViewModel.onLevel2Changed(it) },
                 onLevel2Finished = { settingsViewModel.onLevel2Finished() },
             )
-            SettingsComponents().SwitchRow(
-                title = stringResource(id = R.string.always_show_current),
-                description = stringResource(id = R.string.always_show_current_summary),
-                state = settingsViewModel.alwaysOnSwitchState.collectAsState().value,
-                onCheckedChange = { settingsViewModel.alwaysOnSwitchOnChecked(it) })
-            SettingsComponents().DropdownRow(
-                options = SettingsViewModel.FREQUENCY_OPTIONS,
-                position = settingsViewModel.frequencyIndexState.collectAsState().value,
-                onItemClicked = { settingsViewModel.frequencyItemClicked(it) })
-            SettingsComponents().DNDRow(
-                state = settingsViewModel.dndSwitchState.collectAsState().value,
-                onCheckedChange = { settingsViewModel.dndSwitchOnChecked(it) },
-                startTime = settingsViewModel.dndStartState.collectAsState().value,
-                endTime = settingsViewModel.dndEndState.collectAsState().value,
-                onStartSet = { settingsViewModel.setDNDStart(it)},
-                onEndSet = { settingsViewModel.setDNDEnd(it)})
-            SettingsComponents().FuckOEMRow(
-                title = stringResource(id = settingsViewModel.oemTitle.collectAsState().value),
-                description = stringResource(id = settingsViewModel.oemDescription.collectAsState().value),
-                onUpscaleClicked = { settingsViewModel.onUpscaleClicked() },
-                onDownScaleClicked = { settingsViewModel.onDownscaleClicked() })
-            SettingsComponents().AboutRow(
-                enableOEM = { settingsViewModel.enableOEMLabel() },
-                disableOEM = { settingsViewModel.restoreOEMLabel() }
-            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SettingsItem(position = GroupPosition.TOP) {
+                SettingsComponents().SwitchRow(
+                    title = stringResource(id = R.string.always_show_current),
+                    description = stringResource(id = R.string.always_show_current_summary),
+                    state = settingsViewModel.alwaysOnSwitchState.collectAsState().value,
+                    onCheckedChange = { settingsViewModel.alwaysOnSwitchOnChecked(it) })
+            }
+            SettingsItem(position = GroupPosition.MIDDLE) {
+                SettingsComponents().DropdownRow(
+                    options = SettingsViewModel.FREQUENCY_OPTIONS,
+                    position = settingsViewModel.frequencyIndexState.collectAsState().value,
+                    onItemClicked = { settingsViewModel.frequencyItemClicked(it) })
+            }
+            SettingsItem(position = GroupPosition.MIDDLE) {
+                SettingsComponents().DNDRow(
+                    state = settingsViewModel.dndSwitchState.collectAsState().value,
+                    onCheckedChange = { settingsViewModel.dndSwitchOnChecked(it) },
+                    startTime = settingsViewModel.dndStartState.collectAsState().value,
+                    endTime = settingsViewModel.dndEndState.collectAsState().value,
+                    onStartSet = { settingsViewModel.setDNDStart(it) },
+                    onEndSet = { settingsViewModel.setDNDEnd(it) })
+            }
+            SettingsItem(position = GroupPosition.BOTTOM) {
+                SettingsComponents().FuckOEMRow(
+                    title = stringResource(id = settingsViewModel.oemTitle.collectAsState().value),
+                    description = stringResource(id = settingsViewModel.oemDescription.collectAsState().value),
+                    onUpscaleClicked = { settingsViewModel.onUpscaleClicked() },
+                    onDownScaleClicked = { settingsViewModel.onDownscaleClicked() })
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SettingsItem(position = GroupPosition.SINGLE) {
+                SettingsComponents().AboutRow(
+                    enableOEM = { settingsViewModel.enableOEMLabel() },
+                    disableOEM = { settingsViewModel.restoreOEMLabel() }
+                )
+            }
             Spacer(
                 Modifier.windowInsetsBottomHeight(
                     WindowInsets.systemBars
