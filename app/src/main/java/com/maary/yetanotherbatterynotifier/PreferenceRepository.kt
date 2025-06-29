@@ -59,13 +59,6 @@ class PreferenceRepository @Inject constructor(@ApplicationContext context: Cont
         }
     }
 
-    suspend fun toggleServiceState() {
-        dataStore.edit { pref ->
-            val newState = pref[SERVICE_ENABLED] ?: false
-            pref[SERVICE_ENABLED] = !newState
-        }
-    }
-
     suspend fun setServiceState(state: Boolean) {
         dataStore.edit { pref ->
             pref[SERVICE_ENABLED] = state
