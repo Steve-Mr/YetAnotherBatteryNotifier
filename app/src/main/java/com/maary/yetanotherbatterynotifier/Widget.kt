@@ -65,8 +65,8 @@ class Widget : GlanceAppWidget() {
         }
         val contentDescription = context.getString(contentDescResId)
 
-        val buttonBackgroundColor = GlanceTheme.colors.primary
-        val iconTintColor = GlanceTheme.colors.onPrimary
+        val buttonBackgroundColor = GlanceTheme.colors.primaryContainer
+        val iconTintColor = GlanceTheme.colors.primary
 
 
         // --- 构建 UI ---
@@ -77,11 +77,9 @@ class Widget : GlanceAppWidget() {
         ) {
             // 内层 Box 作为按钮的视觉容器和交互区域
             Box(
-                modifier = GlanceModifier
+                modifier = GlanceModifier.fillMaxWidth().padding(vertical = 8.dp)
                     .clickable (onClick = actionSendBroadcast(sleepIntent))
-                    .background(buttonBackgroundColor)
-                    .cornerRadius(64.dp) // 例如 16dp，可以尝试 8.dp, 24.dp, 或 50.dp (接近药丸形状)
-                    .padding(horizontal = 20.dp, vertical = 8.dp), // 调整 padding
+                    .background(buttonBackgroundColor),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
@@ -122,20 +120,13 @@ class Widget : GlanceAppWidget() {
         Column(
             modifier = GlanceModifier.fillMaxSize()
                 .clickable(onClick = actionStartActivity<SettingsActivity>())
-                .background(GlanceTheme.colors.tertiaryContainer),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .background(GlanceTheme.colors.tertiary),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Column(
-                modifier = GlanceModifier.padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
                 Column(
-                    modifier = GlanceModifier
-                        .background(GlanceTheme.colors.tertiary)
-                        .cornerRadius(8.dp).padding(vertical = 4.dp)
+                    modifier = GlanceModifier.defaultWeight()
                         .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
                     horizontalAlignment = Alignment.CenterHorizontally // 使内容在 Column 内水平居中
                 ) {
                     // 第一行：电流值 + 单位 (mA)
@@ -143,7 +134,7 @@ class Widget : GlanceAppWidget() {
                         verticalAlignment = Alignment.Bottom // 尝试底部对齐，使不同大小的文字基线对齐效果更好
                     ) {
                         Text(
-                            text = "$currentNow ",
+                            text = "$currentNow",
                             style = baseTextStyle.copy(fontSize = defaultFontSize) // 使用默认字号
                         )
                         Text(
@@ -155,7 +146,7 @@ class Widget : GlanceAppWidget() {
                     // 第二行：温度值 + 单位 (℃)
                     // Column 会自动处理换行
                     Text(
-                        text = "$temperatureNow ℃",
+                        text = "$temperatureNow℃",
                         style = baseTextStyle.copy(fontSize = defaultFontSize), // 使用默认字号
                         maxLines = 1
                     )
@@ -163,10 +154,8 @@ class Widget : GlanceAppWidget() {
                 DndToggleButtonWidget(
                     dndState,
                     sleepIntent,
-                    GlanceModifier.fillMaxWidth().padding(vertical = 8.dp)
+                    GlanceModifier.fillMaxWidth()
                 )
-            }
         }
     }
-
 }
