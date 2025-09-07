@@ -236,6 +236,13 @@ class SettingsViewModel @Inject constructor(
         restartForegroundService()
     }
 
+    fun onNegativeClicked() {
+        viewModelScope.launch {
+            preferenceRepository.flipNegativeIsCharging()
+        }
+        restartForegroundService()
+    }
+
     init {
         viewModelScope.launch { //
             val desiredServiceState = preferenceRepository.getServiceEnabled().first() // 从 DataStore 获取期望状态

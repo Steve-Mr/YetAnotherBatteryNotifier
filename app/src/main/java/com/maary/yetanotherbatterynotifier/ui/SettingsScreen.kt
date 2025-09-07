@@ -31,8 +31,6 @@ import com.maary.yetanotherbatterynotifier.R
 import com.maary.yetanotherbatterynotifier.SettingsViewModel
 import com.maary.yetanotherbatterynotifier.ui.theme.YetAnotherBatteryNotifierTheme
 
-import com.maary.yetanotherbatterynotifier.ui.SettingsComponents
-
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -112,7 +110,8 @@ fun SettingsScreen(settingsViewModel: SettingsViewModel = viewModel()) {
                     title = stringResource(id = settingsViewModel.oemTitle.collectAsState().value),
                     description = stringResource(id = settingsViewModel.oemDescription.collectAsState().value),
                     onUpscaleClicked = { settingsViewModel.onUpscaleClicked() },
-                    onDownScaleClicked = { settingsViewModel.onDownscaleClicked() })
+                    onDownScaleClicked = { settingsViewModel.onDownscaleClicked() },
+                    onNegativeClicked = { settingsViewModel.onNegativeClicked() })
             }
 
             Spacer(modifier = Modifier.height(16.dp))

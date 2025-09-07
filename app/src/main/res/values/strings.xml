@@ -61,5 +61,8 @@
     <string name="dnd_end_time">End</string>
     <string name="dnd_content_description_on">DND state ON</string>
     <string name="dnd_content_description_off">DND state OFF</string>
+    <string name="value_too_small">Scale Up</string>
+    <string name="value_too_large">Scale Down</string>
+    <string name="invert_polarity">Invert Polarity</string>
 
 </resources>

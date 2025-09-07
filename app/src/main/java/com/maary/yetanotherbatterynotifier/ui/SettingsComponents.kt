@@ -8,6 +8,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -387,7 +388,7 @@ class SettingsComponents {
 
     @Composable
     fun FuckOEMRow(title: String, description: String,
-                   onUpscaleClicked: () -> Unit, onDownScaleClicked: () -> Unit) {
+                   onUpscaleClicked: () -> Unit, onDownScaleClicked: () -> Unit, onNegativeClicked: () -> Unit) {
         Column(
             modifier = Modifier.fillMaxWidth()
                 .padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 8.dp),
@@ -396,27 +397,33 @@ class SettingsComponents {
                 modifier = Modifier,
                 title = title,
                 description = description)
-            Row(
+            FlowRow (
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
+//                horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
                 OutlinedButton(
                     modifier = Modifier
                         .wrapContentWidth()
-                        .padding(8.dp),
+                        .padding(4.dp),
                     onClick = onUpscaleClicked) {
-                    Text("值太小")
+                    Text(stringResource(R.string.value_too_small))
                 }
 
                 OutlinedButton(
                     modifier = Modifier
                         .wrapContentWidth()
-                        .padding(8.dp),
+                        .padding(4.dp),
                     onClick = onDownScaleClicked) {
-                    Text("值太大")
+                    Text(stringResource(R.string.value_too_large))
                 }
 
+                OutlinedButton(
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(4.dp),
+                    onClick = onNegativeClicked) {
+                    Text(stringResource(R.string.invert_polarity))
+                }
             }
         }
     }

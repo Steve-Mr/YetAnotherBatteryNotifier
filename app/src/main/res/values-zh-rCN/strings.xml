@@ -52,4 +52,7 @@
     <string name="dnd_end_time">结束时间</string>
     <string name="dnd_content_description_on">当前是免打扰状态</string>
     <string name="dnd_content_description_off">当前非免打扰状态</string>
+    <string name="value_too_small">值太小</string>
+    <string name="value_too_large">值太大</string>
+    <string name="invert_polarity">正负反转</string>
 </resources>

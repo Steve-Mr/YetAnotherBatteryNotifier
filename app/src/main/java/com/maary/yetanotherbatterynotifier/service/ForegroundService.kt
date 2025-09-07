@@ -49,6 +49,7 @@ class ForegroundService : LifecycleService() {
 
     private var level1 = 80
     private var level2 = 85
+    private var negativeIsCharging = true
 
     val screenReceiver = ScreenReceiver()
     private val chargingReceiver = ChargingReceiver()
@@ -127,6 +128,9 @@ class ForegroundService : LifecycleService() {
         preferences.getLevel2().onEach {
             level2 = it
         }.launchIn(lifecycleScope)
+        preferences.getNegativeIsCharging().onEach {
+            negativeIsCharging = it
+        }.launchIn(lifecycleScope)
 
         lifecycleScope.launch {
             var filter = IntentFilter()
@@ -157,7 +161,7 @@ class ForegroundService : LifecycleService() {
         if (isLevelReceiver) unregisterReceiver(levelReceiver)
         if (isScreenOnReceiver) unregisterReceiver(screenReceiver)
         val notificationManager: NotificationManager =
-            this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            this.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.cancel(1)
         notificationManager.cancel(2)
         instance = null
@@ -177,9 +181,9 @@ class ForegroundService : LifecycleService() {
         if (timer == null) {
             timer = Timer()
             val batteryManager: BatteryManager =
-                getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+                getSystemService(BATTERY_SERVICE) as BatteryManager
             val notificationManager: NotificationManager =
-                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
             timer?.schedule(object : TimerTask() {
                 override fun run() {
@@ -188,9 +192,12 @@ class ForegroundService : LifecycleService() {
                         IntentFilter(Intent.ACTION_BATTERY_CHANGED)
                     )
 
-                    val currentNow: Long =
-                        -batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
+                    var currentNow: Long =
+                        batteryManager.getLongProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)
                             .div(ratio)
+                    if (negativeIsCharging) {
+                        currentNow = -currentNow
+                    }
 
                     _currentFlow.value = currentNow
                     _temperatureFlow.value = (batteryStatus?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)
@@ -243,7 +250,7 @@ class ForegroundService : LifecycleService() {
             priority = NotificationCompat.PRIORITY_MIN
         )
         val notificationManager: NotificationManager =
-            this.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            this.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(1, notification)
     }
 
@@ -291,7 +298,7 @@ class ForegroundService : LifecycleService() {
                 }
             } else if ("android.intent.action.ACTION_POWER_DISCONNECTED" == p1.action) {
                 val notificationManager: NotificationManager =
-                    p0.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    p0.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                 notificationManager.cancel(2)
                 if (isLevelReceiver) {
                     unregisterReceiver(levelReceiver)
@@ -342,7 +349,7 @@ class ForegroundService : LifecycleService() {
                         if (level == level1 || level == level2) {
 
                             val notificationManager: NotificationManager =
-                                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
                             notificationManager.notify(
                                 2,
                                 updateNotificationInfo(

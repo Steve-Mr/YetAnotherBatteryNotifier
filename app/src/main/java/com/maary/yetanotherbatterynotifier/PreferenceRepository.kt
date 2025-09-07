@@ -49,6 +49,7 @@ class PreferenceRepository @Inject constructor(@ApplicationContext context: Cont
         val DND_END_TIME = stringPreferencesKey("dnd_end_time")
 
         val RATIO = intPreferencesKey("ratio")
+        val NEGATIVE_IS_CHARGING = booleanPreferencesKey("negative_is_charging")
 
         val ENABLE_FUCK_OEM = booleanPreferencesKey("fuck_oem")
     }
@@ -191,6 +192,18 @@ class PreferenceRepository @Inject constructor(@ApplicationContext context: Cont
     suspend fun setRatio(ratio: Int) {
         dataStore.edit { preferences ->
             preferences[RATIO] = ratio
+        }
+    }
+
+    fun getNegativeIsCharging(): Flow<Boolean> {
+        return dataStore.data.map { preferences ->
+            preferences[NEGATIVE_IS_CHARGING]?: true
+        }
+    }
+
+    suspend fun flipNegativeIsCharging() {
+        dataStore.edit { preferences ->
+            preferences[NEGATIVE_IS_CHARGING] = !(preferences[NEGATIVE_IS_CHARGING]?:false)
         }
     }
 
