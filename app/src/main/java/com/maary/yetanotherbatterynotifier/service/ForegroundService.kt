@@ -152,6 +152,26 @@ class ForegroundService : LifecycleService() {
             registerReceiver(chargingReceiver, filter)
         }
 
+        // 问题修复：服务启动/重启时，如果手机已经插着电，系统不会发送 ACTION_POWER_CONNECTED。
+        // 所以我们需要主动“问”一下系统当前的充电状态。
+
+        // 传入 null 作为 receiver，可以直接获取当前保存的粘性广播 Intent
+        val batteryStatusIntent = registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+
+        val status = batteryStatusIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+        val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                status == BatteryManager.BATTERY_STATUS_FULL
+
+        // 如果当前正在充电，且还没注册电量监听器，则立即注册
+        if (isCharging) {
+            if (!isLevelReceiver) {
+                registerReceiver(levelReceiver, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+                isLevelReceiver = true
+                // 如果需要立即启动定时任务来更新电流读数（视您的业务逻辑而定），也可以在这里调用 startTimerTask()
+                // startTimerTask()
+            }
+        }
+
         instance = this
     }
 
