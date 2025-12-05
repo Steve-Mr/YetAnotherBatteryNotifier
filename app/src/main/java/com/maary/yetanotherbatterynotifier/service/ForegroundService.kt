@@ -78,7 +78,8 @@ class ForegroundService : LifecycleService() {
 
         @JvmStatic
         fun getInstance(): ForegroundService {
-            return instance ?: throw IllegalStateException("ForegroundService instance has not been initialized.")
+            return instance
+                ?: throw IllegalStateException("ForegroundService instance has not been initialized.")
         }
     }
 
@@ -200,8 +201,9 @@ class ForegroundService : LifecycleService() {
                     }
 
                     _currentFlow.value = currentNow
-                    _temperatureFlow.value = (batteryStatus?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)
-                        ?.div(10) ?: 0)
+                    _temperatureFlow.value =
+                        (batteryStatus?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0)
+                            ?.div(10) ?: 0)
 
                     notificationManager.notify(
                         1,
@@ -327,43 +329,46 @@ class ForegroundService : LifecycleService() {
             runBlocking {
                 if (preferences.getDndSet().first() || preferences.getTempDnd().first()) {
                     val startTime = calculateMinutesFromDate(
-                        preferences.getDndStartTime().first()!!)
+                        preferences.getDndStartTime().first()!!
+                    )
                     val endTime = calculateMinutesFromDate(
-                        preferences.getDndEndTime().first()!!)
+                        preferences.getDndEndTime().first()!!
+                    )
 
                     val isNightTime = if (endTime < startTime) {
-                        currentTime >= startTime || currentTime <= endTime }
-                    else {
+                        currentTime >= startTime || currentTime <= endTime
+                    } else {
                         currentTime in startTime..endTime
                     }
 
                     val isTempDnd =
-                    System.currentTimeMillis().minus(preferences.getTempDndEnabledTime().first()) < 1000 * 60 * 60
+                        System.currentTimeMillis()
+                            .minus(preferences.getTempDndEnabledTime().first()) < 1000 * 60 * 60
 
                     if (isNightTime || isTempDnd) {
-                        Log.v("YABN", "SHUUUUUUUUUU")
+                        Log.v("YABN_DEBUG", "Notification BLOCKED by DND logic")
                         return@runBlocking
                     }
+                }
 
-                    if (level != null) {
-                        if (level == level1 || level == level2) {
+                if (level != null) {
+                    if (level == level1 || level == level2) {
 
-                            val notificationManager: NotificationManager =
-                                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-                            notificationManager.notify(
-                                2,
-                                updateNotificationInfo(
-                                    resources.getString(R.string.channel_notify),
-                                    isOnGoing = false,
-                                    isAlertOnce = false,
-                                    title = resources.getString(R.string.charged, level, "%"),
-                                    content = "",
-                                    icon = R.drawable.notification_charging,
-                                    withAction = false,
-                                    priority = NotificationCompat.PRIORITY_DEFAULT
-                                )
+                        val notificationManager: NotificationManager =
+                            getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+                        notificationManager.notify(
+                            2,
+                            updateNotificationInfo(
+                                resources.getString(R.string.channel_notify),
+                                isOnGoing = false,
+                                isAlertOnce = false,
+                                title = resources.getString(R.string.charged, level, "%"),
+                                content = "",
+                                icon = R.drawable.notification_charging,
+                                withAction = false,
+                                priority = NotificationCompat.PRIORITY_DEFAULT
                             )
-                        }
+                        )
                     }
                 }
             }
@@ -409,7 +414,7 @@ class ForegroundService : LifecycleService() {
                     preferences.setTempDnd(false)
                     _dndState.value = false
                 }
-            }else if(preferences.getDndSet().first()) {
+            } else if (preferences.getDndSet().first()) {
                 val currentTime = Calendar.getInstance().apply {
                     time = Date()
                 }
@@ -420,15 +425,18 @@ class ForegroundService : LifecycleService() {
                     time = preferences.getDndEndTime().first()!!
                 }
 
-                val currentMinutes = currentTime.get(Calendar.HOUR_OF_DAY) * 60 + currentTime.get(Calendar.MINUTE)
-                val startMinutes = startTime.get(Calendar.MINUTE) + startTime.get(Calendar.HOUR_OF_DAY) * 60
-                val endMinutes = endTime.get(Calendar.MINUTE) + endTime.get(Calendar.HOUR_OF_DAY) * 60
+                val currentMinutes =
+                    currentTime.get(Calendar.HOUR_OF_DAY) * 60 + currentTime.get(Calendar.MINUTE)
+                val startMinutes =
+                    startTime.get(Calendar.MINUTE) + startTime.get(Calendar.HOUR_OF_DAY) * 60
+                val endMinutes =
+                    endTime.get(Calendar.MINUTE) + endTime.get(Calendar.HOUR_OF_DAY) * 60
 
-                val sh = "%02d".format( startMinutes / 60)
-                val sm = "%02d".format(( startMinutes ) % 60)
+                val sh = "%02d".format(startMinutes / 60)
+                val sm = "%02d".format((startMinutes) % 60)
 
                 val eh = "%02d".format(endMinutes / 60)
-                val em = "%02d".format(( endMinutes ) % 60)
+                val em = "%02d".format((endMinutes) % 60)
 
                 if (endMinutes < startMinutes) {
                     if (currentMinutes >= startMinutes || currentMinutes <= endMinutes) {
@@ -462,7 +470,8 @@ class ForegroundService : LifecycleService() {
 
         if (withAction) {
             val settingsIntent = Intent(this, SettingsActivity::class.java)
-            val settingsPendingIntent = PendingIntent.getActivity(this, 0, settingsIntent, PendingIntent.FLAG_IMMUTABLE)
+            val settingsPendingIntent =
+                PendingIntent.getActivity(this, 0, settingsIntent, PendingIntent.FLAG_IMMUTABLE)
 
             val actionSettings: NotificationCompat.Action = NotificationCompat.Action.Builder(
                 R.drawable.ic_baseline_settings_24,
